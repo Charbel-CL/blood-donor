@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Lebanon National Hospital",
+    "address": "Rue 56, Byblos, Lebanon",
+    "phone": "+961 9 123456",
+    "email": "info@lnhospital.com",
+    "services": ["Cardiology", "Pediatric Care", "Emergency Services"],
+    "rating": 4.3,
+    "image":"/assets/Leb-national-hosp.png"
+  },
+  {
+    "id": 2,
+    "name": "Mount Lebanon Hospital",
+    "address": "Independence Street, Sidon, Lebanon",
+    "phone": "+961 7 654321",
+    "email": "contact@mlhospital.com",
+    "services": ["Orthopedics", "Neurology", "Maternity"],
+    "rating": 4.4,
+    "image":"/assets/Mount-Leb-hosp.png"
+  },
+  {
+    "id": 3,
+    "name": "Saint George Hospital",
+    "address": "Achrafieh, Beirut, Lebanon",
+    "phone": "+961 1 445500",
+    "email": "support@sghumc.org",
+    "services": ["Oncology", "Dermatology", "General Surgery"],
+    "rating": 4.7,
+    "image":"/assets/St-george-hosp.png"
+  },
+  {
+    "id": 1,
+    "name": "Lebanon National Hospital",
+    "address": "Rue 56, Byblos, Lebanon",
+    "phone": "+961 9 123456",
+    "email": "info@lnhospital.com",
+    "services": ["Cardiology", "Pediatric Care", "Emergency Services"],
+    "rating": 4.3,
+    "image":"/assets/Leb-national-hosp.png"
+  },
+  {
+    "id": 2,
+    "name": "Mount Lebanon Hospital",
+    "address": "Independence Street, Sidon, Lebanon",
+    "phone": "+961 7 654321",
+    "email": "contact@mlhospital.com",
+    "services": ["Orthopedics", "Neurology", "Maternity"],
+    "rating": 4.4,
+    "image":"/assets/Mount-Leb-hosp.png"
+  },
+  {
+    "id": 3,
+    "name": "Saint George Hospital",
+    "address": "Achrafieh, Beirut, Lebanon",
+    "phone": "+961 1 445500",
+    "email": "support@sghumc.org",
+    "services": ["Oncology", "Dermatology", "General Surgery"],
+    "rating": 4.7,
+    "image":"/assets/St-george-hosp.png"
+  }
+]

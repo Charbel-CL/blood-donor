@@ -1,0 +1,52 @@
+.landing-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  height: 100vh; 
+  padding: 0 10%;
+  background-color: #1a1a1a; 
+  color: white;
+}
+
+.heart-image {
+  width: 900px; 
+  height: 700px;
+  margin-right: 50px; 
+  background-image: url('../assets/heart-icon.png'); 
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; 
+}
+
+.text-container h1 {
+  font-size: 48px;
+  color: red;
+  margin: 0;
+}
+
+.text-container p {
+  font-size: 24px;
+  margin: 20px 0;
+}
+
+.donate-button {
+  font-size: 24px;
+  padding: 10px 20px;
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.donate-button:hover {
+  background-color: darkred;
+}
