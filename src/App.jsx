@@ -11,22 +11,23 @@ import Testimonials from "./Components/Testimonials/Testimonials";
 import Signup from "./Components/SignUp/Signup";
 import Login from "./Components/Login/Login";
 import Hospitals from "./Components/Hospitals/Hospitals";
+import UserDashboard from "./Components/Dash/UserDashboard";
 
 function App() {
   const homeRef = useRef(null);
   const aboutRef = useRef(null);
   const contactRef = useRef(null);
+  const isAuthenticated = true; 
 
   return (
     <Router>
       <div>
-        <Header homeRef={homeRef} aboutRef={aboutRef} contactRef={contactRef} />
+        <Header homeRef={homeRef} aboutRef={aboutRef} contactRef={contactRef} isAuthenticated={isAuthenticated} />
         <Routes>
           <Route path="/signup" element={<Signup />} />
-
-          <Route path="/login" element={<Login/>} />
-
+          <Route path="/login" element={<Login />} />
           <Route path="/hospitals" element={<Hospitals />} />
+          {isAuthenticated && <Route path="/dashboard" element={<UserDashboard />} />}
           <Route
             path="/"
             element={

@@ -20,6 +20,7 @@ function Header({ homeRef, aboutRef, contactRef }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(true); 
 
   const toggle = () => setIsOpen(!isOpen);
 
@@ -56,7 +57,7 @@ function Header({ homeRef, aboutRef, contactRef }) {
                 smooth={true}
                 offset={-70}
                 duration={500}
-                className={`nav-link ${activeLink}`}
+                className={`nav-link ${activeLink === "home" ? "active" : ""}`}
                 onSetActive={() => handleSetActive("home")}
                 onClick={() => handleNavigateAndScroll(homeRef)}
               >
@@ -104,6 +105,13 @@ function Header({ homeRef, aboutRef, contactRef }) {
                 >
                   Contact Us
                 </Link>
+              </NavItem>
+            )}
+            {isAuthenticated && (
+              <NavItem>
+                <NavLink href="/dashboard" className="nav-link">
+                  User Dashboard
+                </NavLink>
               </NavItem>
             )}
             <NavItem>

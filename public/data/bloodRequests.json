@@ -1,0 +1,23 @@
+[
+  {
+    "request_id": 1,
+    "hospital_id": 1,
+    "blood_type": "O+",
+    "quantity": 10,
+    "status": "Pending"
+  },
+  {
+    "request_id": 2,
+    "hospital_id": 2,
+    "blood_type": "A-",
+    "quantity": 5,
+    "status": "Fulfilled"
+  },
+  {
+    "request_id": 3,
+    "hospital_id": 3,
+    "blood_type": "B+",
+    "quantity": 7,
+    "status": "Pending"
+  }
+]
