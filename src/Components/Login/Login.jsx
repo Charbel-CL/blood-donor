@@ -14,11 +14,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import usePost from "../../Hooks/usePost";
 import GraphicSide from "../../assets/GraphicSide.png";
-import MeetYourselfIcon from "../../assets/MeetYourselfIcon.png";
-import TopImg from "../../assets/GraphicTopSide.png";
-
 import "./Login.css";
-import Footer from "../Footer/Footer";
 
 function Login() {
   const [query, setQuery] = useState(
@@ -126,7 +122,6 @@ function Login() {
         <img src={GraphicSide} className="w-full h-screen" alt="Graphic Side" />
       )}
 
-      <Footer />
     </div>
   );
 }

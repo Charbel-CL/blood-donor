@@ -11,13 +11,14 @@ import Signup from "./Components/SignUp/Signup";
 import Login from "./Components/Login/Login";
 import UserDashboard from "./Components/DashBoard/UserDashboard";
 import HowItWorks from "./Components/HowItWorks/HowItWorks";
-import LeafletHospitalMap from "./Components/GoogleHospitalMap/GoogleHospitalMap";
+import LeafletHospitalMap from "./Components/GoogleHospitalMap/LeafletHospitalMap";
+import Statistics from "./Components/Statistics/Statistics";
 
 function App() {
   const homeRef = useRef(null);
   const aboutRef = useRef(null);
   const contactRef = useRef(null);
-  const isAuthenticated = true; 
+  const isAuthenticated = true;
 
   return (
     <Router>
@@ -26,16 +27,18 @@ function App() {
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          {isAuthenticated && <Route path="/dashboard" element={<UserDashboard />} />}
+          {isAuthenticated && (
+            <Route path="/dashboard" element={<UserDashboard />} />
+          )}
           <Route
             path="/"
             element={
               <>
-                <Landing  />
+                <Landing />
                 <MyCarousel />
-                <Testimonials  />
+                <Testimonials />
                 <HowItWorks />
-                <LeafletHospitalMap />
+                <Statistics />
                 <Footer />
               </>
             }

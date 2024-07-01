@@ -10,7 +10,6 @@ import Alert from "@mui/material/Alert";
 import usePost from "../../Hooks/usePost";
 import GraphicSide from "../../assets/GraphicSide.png";
 import "./Signup.css";
-import Footer from "../Footer/Footer";
 
 import Box from "@mui/material/Box";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -148,7 +147,7 @@ function Signup() {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 items-center h-full">
+    <div className="grid grid-cols-1 xl:grid-cols-2 items-center">
       {query ? (
         <img
           src={GraphicSide}
@@ -158,7 +157,7 @@ function Signup() {
       ) : (
         ""
       )}
-      <form onSubmit={handleSubmit} className="bg-white h-auto signup">
+      <form onSubmit={handleSubmit} className="bg-white max-w-full h-full signup">
         <div className="text-center p-5">
           <h1 className="text-5xl p-3">Profile Setup</h1>
           <span className="text-2xl">Create your account</span>
@@ -359,7 +358,6 @@ function Signup() {
           </div>
         </div>
       </form>
-      <Footer />
     </div>
   );
 }

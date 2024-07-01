@@ -2,9 +2,12 @@
   width: 215vh;
 }
 .graphic-side{
-  height: 1200px;
+  height:1025px;
+  width: 1040px;
 }
 
 .signup{
   padding: 50px;
+  width: 100%;
 }
+
