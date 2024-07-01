@@ -1,0 +1,39 @@
+.how-it-works {
+  text-align: center;
+  background-color: #1A1A1A;
+  padding: 40px 20px;
+  margin-bottom: 500px;
+  overflow: hidden;
+}
+
+.how-it-works-title {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.steps-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.step {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 50px;
+  margin: 10px;
+  width: 400px;
+}
+
+.step h2 {
+  font-size: 1.5rem;
+  color: #e63946;
+}
+
+.step p {
+  font-size: 1rem;
+  color: #333;
+}

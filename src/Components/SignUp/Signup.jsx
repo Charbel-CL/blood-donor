@@ -53,7 +53,7 @@ function Signup() {
         customer.firstName !== "" &&
         customer.lastName !== "" &&
         customer.password !== "" &&
-        customer.bloodType !== "" // Added condition for bloodType
+        customer.bloodType !== "" 
     );
   }, [dobError, errorPassword, isChecked, customer]);
 

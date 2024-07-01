@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Testimonials.css"; 
+import "./Testimonials.css";
 import person1 from "../../assets/person1.jpg";
 import person2 from "../../assets/person2.jpg";
 import person3 from "../../assets/person3.jpg";
@@ -29,11 +29,10 @@ const testimonials = [
 ];
 
 function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(1);
 
   const nextTestimonial = () => {
-    const newIndex =
-      activeIndex === testimonials.length - 1 ? 0 : activeIndex + 1;
+    const newIndex = (activeIndex + 1) % testimonials.length;
     setActiveIndex(newIndex);
   };
 
@@ -45,19 +44,45 @@ function Testimonials() {
 
   return (
     <div className="testimonials" id="about-us">
-      <h1 className="text-3xl text-light">Stories from Our Community</h1>
-      <div className="testimonial-item">
-        <img
-          src={testimonials[activeIndex].image}
-          alt={testimonials[activeIndex].name}
-          className="testimonial-image"
-        />
-        <p className="testimonial-text">
-          "{testimonials[activeIndex].quote}" - {testimonials[activeIndex].name}
-        </p>
+      <h1 className="testimonials-title">Stories from Our Community</h1>
+      <div className="testimonial-cards">
+        {testimonials.map((testimonial, index) => {
+          let position = 'nextCard';
+          if (index === activeIndex) {
+            position = 'activeCard';
+          } else if (
+            index === activeIndex - 1 ||
+            (activeIndex === 0 && index === testimonials.length - 1)
+          ) {
+            position = 'prevCard';
+          }
+          return (
+            <div
+              key={testimonial.id}
+              className={`testimonial-item ${position}`}
+            >
+              <div className="testimonial-quote-container">
+                <div className="testimonial-quote-icon">“</div>
+                <p className="testimonial-quote">{testimonial.quote}</p>
+                <div className="testimonial-quote-icon">”</div>
+                <div
+                  className="testimonial-image"
+                  style={{ backgroundImage: `url(${testimonial.image})` }}
+                ></div>
+                <p className="testimonial-name">{testimonial.name}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
-      <button onClick={prevTestimonial} className="btn">Prev</button>
-      <button onClick={nextTestimonial} className="btn">Next</button>
+      <div className="testimonial-controls">
+        <button onClick={prevTestimonial} className="btn">
+          Prev
+        </button>
+        <button onClick={nextTestimonial} className="btn">
+          Next
+        </button>
+      </div>
     </div>
   );
 }

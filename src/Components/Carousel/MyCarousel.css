@@ -1,20 +1,82 @@
 .custom-carousel {
   margin: auto;
-  max-width: 2000px; 
-  margin: auto; 
-  height: 500px;
-  overflow: hidden; 
+  height: 800px;
+  overflow: hidden;
 }
 
 .custom-carousel .carousel-item img {
   width: 100%;
-  height: 500px;
+  height: 800px; 
   object-fit: cover;
 }
 
-@media (max-width: 756px){
+.custom-carousel .carousel-caption {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 30px; 
+  border-radius: 10px;
+}
+
+.custom-carousel .carousel-caption h3,
+.custom-carousel .carousel-caption p {
+  color: white;
+}
+
+@media (max-width: 1200px) {
+  .custom-carousel {
+    width: 100%;
+    height: 600px;
+  }
+
   .custom-carousel .carousel-item img {
-    width: 90%; 
-    height: 280px; 
+    height: 600px; 
+  }
+
+  .custom-carousel .carousel-caption {
+    padding: 20px; 
+  }
+}
+
+@media (max-width: 992px) {
+  .custom-carousel {
+    height: 500px;
+  }
+
+  .custom-carousel .carousel-item img {
+    height: 500px; 
+  }
+
+  .custom-carousel .carousel-caption {
+    padding: 15px; 
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-carousel {
+    width: 100%;
+    height: 400px;
+  }
+
+  .custom-carousel .carousel-item img {
+    width: 100%;
+    height: 400px; 
+  }
+
+  .custom-carousel .carousel-caption {
+    padding: 10px; 
+  }
+}
+
+@media (max-width: 576px) {
+  .custom-carousel {
+    height: 300px;
+  }
+
+  .custom-carousel .carousel-item img {
+    width: 100%;
+    height: 300px; 
+  }
+
+  .custom-carousel .carousel-caption {
+    padding: 5px; 
   }
 }

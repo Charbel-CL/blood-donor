@@ -6,21 +6,28 @@ import {
   CarouselIndicators,
   CarouselCaption,
 } from "reactstrap";
-import Slide1 from "../../assets/Slide1.png";
-import Slide2 from "../../assets/Slide2.png";
-import Slide3 from "../../assets/Slide3.png";
+import Slide1 from "../../assets/Slide1.jpg";
+import Slide2 from "../../assets/Slide2.jpg";
+import Slide3 from "../../assets/Slide3.jpg";
 import "./MyCarousel.css";
+
 const items = [
   {
     src: Slide1,
+    altText: "Save Lives",
+    caption: "Donate blood and save lives today",
     key: 1,
   },
   {
     src: Slide2,
+    altText: "Be a Hero",
+    caption: "Be a hero in someone's life by donating blood",
     key: 2,
   },
   {
     src: Slide3,
+    altText: "Join the Cause",
+    caption: "Join the cause and help those in need",
     key: 3,
   },
 ];
@@ -53,12 +60,8 @@ function MyCarousel(args) {
         onExited={() => setAnimating(false)}
         key={item.src}
       >
-        <img src={item.src} alt={item.altText} />
-        <CarouselCaption
-          captionText={item.caption}
-          captionHeader={item.caption}
-        />
-
+        <img src={item.src} alt={item.altText} className="d-block w-100 high-res-image" />
+        <CarouselCaption captionText={item.caption} captionHeader={item.altText} />
       </CarouselItem>
     );
   });
@@ -68,6 +71,7 @@ function MyCarousel(args) {
       activeIndex={activeIndex}
       next={next}
       previous={previous}
+      interval={5000}
       className="custom-carousel"
       {...args}
     >

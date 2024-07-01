@@ -6,12 +6,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Landing from "./Components/Landing/Landing";
 import Footer from "./Components/Footer/Footer";
 import MyCarousel from "./Components/Carousel/MyCarousel";
-import ContactForm from "./Components/ContactForm/ContactForm";
 import Testimonials from "./Components/Testimonials/Testimonials";
 import Signup from "./Components/SignUp/Signup";
 import Login from "./Components/Login/Login";
-import Hospitals from "./Components/Hospitals/Hospitals";
-import UserDashboard from "./Components/Dash/UserDashboard";
+import UserDashboard from "./Components/DashBoard/UserDashboard";
+import HowItWorks from "./Components/HowItWorks/HowItWorks";
+import LeafletHospitalMap from "./Components/GoogleHospitalMap/GoogleHospitalMap";
 
 function App() {
   const homeRef = useRef(null);
@@ -22,20 +22,20 @@ function App() {
   return (
     <Router>
       <div>
-        <Header homeRef={homeRef} aboutRef={aboutRef} contactRef={contactRef} isAuthenticated={isAuthenticated} />
+        <Header isAuthenticated={isAuthenticated} />
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/hospitals" element={<Hospitals />} />
           {isAuthenticated && <Route path="/dashboard" element={<UserDashboard />} />}
           <Route
             path="/"
             element={
               <>
-                <Landing ref={homeRef} />
+                <Landing  />
                 <MyCarousel />
-                <Testimonials ref={aboutRef} />
-                <ContactForm ref={contactRef} />
+                <Testimonials  />
+                <HowItWorks />
+                <LeafletHospitalMap />
                 <Footer />
               </>
             }

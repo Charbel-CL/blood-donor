@@ -20,7 +20,7 @@ function Header({ homeRef, aboutRef, contactRef }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(true); 
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const toggle = () => setIsOpen(!isOpen);
 
@@ -45,7 +45,7 @@ function Header({ homeRef, aboutRef, contactRef }) {
         className="custom-navbar"
       >
         <NavbarBrand href="/">
-          <img src={logo} className="blood-donor-logo" />
+          <img src={logo} className="blood-donor-logo" alt="Blood Donor Logo" />
         </NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
@@ -83,30 +83,21 @@ function Header({ homeRef, aboutRef, contactRef }) {
                 </NavItem>
               </>
             )}
-
             <NavItem>
-              <NavLink href="/hospitals" className="nav-link">
-                Hospitals
-              </NavLink>
+              <Link
+                to="how-it-works"
+                spy={true}
+                smooth={true}
+                offset={-70}
+                duration={500}
+                className={`nav-link ${
+                  activeLink === "how-it-works" ? "active" : ""
+                }`}
+                onSetActive={() => handleSetActive("how-it-works")}
+              >
+                How It Works
+              </Link>
             </NavItem>
-            {!isAuthPage && (
-              <NavItem>
-                <Link
-                  to="contact-us"
-                  spy={true}
-                  smooth={true}
-                  offset={-70}
-                  duration={500}
-                  className={`nav-link ${
-                    activeLink === "contact-us" ? "active" : ""
-                  }`}
-                  onSetActive={() => handleSetActive("contact-us")}
-                  onClick={() => handleNavigateAndScroll(contactRef)}
-                >
-                  Contact Us
-                </Link>
-              </NavItem>
-            )}
             {isAuthenticated && (
               <NavItem>
                 <NavLink href="/dashboard" className="nav-link">
