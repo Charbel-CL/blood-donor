@@ -48,8 +48,8 @@ const UserDashboard = () => {
   });
 
   return (
-    <div className='bg-white'>
-      <Container className='mt-32'>
+    <div className='dashboard-wrapper mt-32'>
+      <Container className='content-container'>
         <Typography variant="h4" component="h1" gutterBottom>
           Blood Requests
         </Typography>
@@ -82,7 +82,7 @@ const UserDashboard = () => {
                         size={24}
                         activeColor="#ffd700"
                         edit={false}
-                        isHalf={true} // Enable half stars
+                        isHalf={true} 
                       />
                       <Typography variant="body2" color="textSecondary" className="rating-number">
                         {hospital.rating}
