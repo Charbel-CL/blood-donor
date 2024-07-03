@@ -13,6 +13,7 @@ import UserDashboard from "./Components/DashBoard/UserDashboard";
 import HowItWorks from "./Components/HowItWorks/HowItWorks";
 import LeafletHospitalMap from "./Components/GoogleHospitalMap/LeafletHospitalMap";
 import Statistics from "./Components/Statistics/Statistics";
+import DonationForm from "./Components/DonationForm/DonationForm";
 
 function App() {
   const homeRef = useRef(null);
@@ -43,6 +44,7 @@ function App() {
               </>
             }
           />
+          <Route path="/donation-form" element={<DonationForm />} />
         </Routes>
       </div>
     </Router>

@@ -1,7 +1,6 @@
 #root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 .dashboard-wrapper {
@@ -64,6 +63,16 @@
   margin: 0 auto;
   text-align: center;
   padding: 20px;
+}
+
+.donate-btn{
+  padding-top: 20px;
+  padding-bottom: 410px;
+  background-color: #ccc;
+}
+
+.css-sghohy-MuiButtonBase-root-MuiButton-root{
+  margin-left: 120px !important;
 }
 
 .custom-footer {

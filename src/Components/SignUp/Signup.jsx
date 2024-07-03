@@ -18,7 +18,7 @@ function Signup() {
   const [customer, setCustomer] = useState({
     firstName: "",
     lastName: "",
-    chromosomal: "XX",
+    gender: "Male",
     dob: "",
     email: "",
     password: "",
@@ -137,7 +137,7 @@ function Signup() {
       postData("/auth/signup", {
         first_name: customer.firstName,
         last_name: customer.lastName,
-        chromosomal_identification: customer.chromosomal,
+        gender_identification: customer.gender,
         date_of_birth: customer.dob,
         email: customer.email,
         password: customer.password,
@@ -158,7 +158,7 @@ function Signup() {
         ""
       )}
       <form onSubmit={handleSubmit} className="bg-white max-w-full h-full signup">
-        <div className="text-center p-5">
+        <div className="text-center p-5 mt-3">
           <h1 className="text-5xl p-3">Profile Setup</h1>
           <span className="text-2xl">Create your account</span>
         </div>
@@ -193,24 +193,24 @@ function Signup() {
                 id="demo-row-radio-buttons-group-label"
                 className="text-sm md:text-lg "
               >
-                Chromosomal Identification*{" "}
+                gender Identification*{" "}
               </h2>
               <RadioGroup
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
-                name="chromosomal"
+                name="gender"
                 defaultValue="female"
                 onChange={handleChange}
               >
                 <FormControlLabel
                   value="female"
                   control={<Radio />}
-                  label="XX Female"
+                  label="Female"
                 />
                 <FormControlLabel
                   value="male"
                   control={<Radio />}
-                  label="XY Male"
+                  label="Male"
                 />
               </RadioGroup>
             </FormControl>

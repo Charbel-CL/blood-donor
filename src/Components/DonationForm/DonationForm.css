@@ -1,0 +1,96 @@
+.form-wrapper {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.container-questions {
+  background-color: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-title {
+  margin-bottom: 30px;
+  font-size: 30px;
+  color: #333;
+  font-weight: bold;
+}
+
+.progress-bar {
+  margin-bottom: 20px;
+}
+
+.question-slide {
+  text-align: center;
+  margin: 20px 0;
+  transition: all 0.5s ease-in-out;
+}
+
+.question-slide-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.quiz-question {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.quiz-options {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.eligibility-message {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+  color: #d32f2f;
+  font-weight: bold;
+  animation: shake 0.5s;
+}
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translate(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
