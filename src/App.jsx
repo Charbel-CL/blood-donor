@@ -11,9 +11,9 @@ import Signup from "./Components/SignUp/Signup";
 import Login from "./Components/Login/Login";
 import UserDashboard from "./Components/DashBoard/UserDashboard";
 import HowItWorks from "./Components/HowItWorks/HowItWorks";
-import LeafletHospitalMap from "./Components/GoogleHospitalMap/LeafletHospitalMap";
 import Statistics from "./Components/Statistics/Statistics";
 import DonationForm from "./Components/DonationForm/DonationForm";
+import TimeSlotSelection from "./Components/TimeSlotSelection/TimeSlotSelection";
 
 function App() {
   const homeRef = useRef(null);
@@ -45,6 +45,7 @@ function App() {
             }
           />
           <Route path="/donation-form" element={<DonationForm />} />
+          <Route path="/timeslots" element={<TimeSlotSelection />} />
         </Routes>
       </div>
     </Router>

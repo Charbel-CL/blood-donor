@@ -1,6 +1,6 @@
 import React from "react";
 import "./HowItWorks.css";
-import LeafletHospitalMap from "../GoogleHospitalMap/LeafletHospitalMap";
+import LeafletHospitalMap from "../LeafletHospitalMap/LeafletHospitalMap";
 
 const HowItWorks = () => {
   return (

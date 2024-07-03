@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Radio,
   RadioGroup,
   FormControlLabel,
   LinearProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import "./DonationForm.css";
+import { useNavigate } from "react-router-dom";
 
 const questions = [
   { id: 1, question: "Are you between 18 and 65 years old?" },
@@ -22,29 +28,56 @@ const questions = [
 ];
 
 const DonationForm = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [currentStep, setCurrentStep] = useState(() => {
+    return parseInt(localStorage.getItem("currentStep")) || 0;
+  });
+  const [answers, setAnswers] = useState(() => {
+    return JSON.parse(localStorage.getItem("answers")) || {};
+  });
   const [eligibilityMessage, setEligibilityMessage] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem("currentStep", currentStep);
+    localStorage.setItem("answers", JSON.stringify(answers));
+  }, [currentStep, answers]);
+
+  useEffect(() => {
+    if (answers[questions[currentStep].id]) {
+      checkEligibilityForCurrentStep(
+        questions[currentStep].id,
+        answers[questions[currentStep].id]
+      );
+    }
+  }, [currentStep]);
 
   const handleChange = (event, id) => {
-    setAnswers({
+    const newAnswers = {
       ...answers,
       [id]: event.target.value,
-    });
+    };
+    setAnswers(newAnswers);
 
     // Check eligibility immediately after answer change
     checkEligibilityForCurrentStep(id, event.target.value);
   };
 
   const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (!eligibilityMessage && answers[questions[currentStep].id]) {
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(currentStep + 1);
+        setEligibilityMessage("");
+      } else {
+        handleSubmit();
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      setEligibilityMessage("");
     }
   };
 
@@ -96,6 +129,21 @@ const DonationForm = () => {
     }
   };
 
+  const handleSubmit = () => {
+    // Clear local storage
+    localStorage.removeItem("currentStep");
+    localStorage.removeItem("answers");
+
+    // Open the confirmation dialog
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    navigate("/timeslots");
+  };
+
+
   return (
     <div className="container-questions">
       <div className="form-wrapper">
@@ -142,6 +190,18 @@ const DonationForm = () => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Form Submission</DialogTitle>
+        <DialogContent>
+          <p>Your form has been submitted successfully!</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
