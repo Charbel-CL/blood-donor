@@ -34,6 +34,10 @@ function Header({ homeRef, aboutRef, contactRef }) {
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/SignUp";
+  const isRestrictedPage =
+    location.pathname === "/dashboard" ||
+    location.pathname === "/donation-form" ||
+    location.pathname === "/timeslots";
 
   return (
     <div>
@@ -51,20 +55,11 @@ function Header({ homeRef, aboutRef, contactRef }) {
         <Collapse isOpen={isOpen} navbar>
           <Nav className="ml-auto" navbar>
             <NavItem>
-              <Link
-                to="home"
-                spy={true}
-                smooth={true}
-                offset={-70}
-                duration={500}
-                className={`nav-link ${activeLink === "home" ? "active" : ""}`}
-                onSetActive={() => handleSetActive("home")}
-                onClick={() => handleNavigateAndScroll(homeRef)}
-              >
+              <NavLink href="/" className="nav-link">
                 Home
-              </Link>
+              </NavLink>
             </NavItem>
-            {!isAuthPage && (
+            {!isRestrictedPage && !isAuthPage && (
               <>
                 <NavItem>
                   <Link
@@ -81,39 +76,39 @@ function Header({ homeRef, aboutRef, contactRef }) {
                     About Us
                   </Link>
                 </NavItem>
+                <NavItem>
+                  <Link
+                    to="how-it-works"
+                    spy={true}
+                    smooth={true}
+                    offset={-70}
+                    duration={500}
+                    className={`nav-link ${
+                      activeLink === "how-it-works" ? "active" : ""
+                    }`}
+                    onSetActive={() => handleSetActive("how-it-works")}
+                  >
+                    How It Works
+                  </Link>
+                </NavItem>
+                {isAuthenticated && (
+                  <NavItem>
+                    <NavLink href="/dashboard" className="nav-link">
+                      User Dashboard
+                    </NavLink>
+                  </NavItem>
+                )}
+                <NavItem>
+                  <Button
+                    color="danger"
+                    href="/SignUp"
+                    className="nav-button mx-4 px-4"
+                  >
+                    Sign Up
+                  </Button>
+                </NavItem>
               </>
             )}
-            <NavItem>
-              <Link
-                to="how-it-works"
-                spy={true}
-                smooth={true}
-                offset={-70}
-                duration={500}
-                className={`nav-link ${
-                  activeLink === "how-it-works" ? "active" : ""
-                }`}
-                onSetActive={() => handleSetActive("how-it-works")}
-              >
-                How It Works
-              </Link>
-            </NavItem>
-            {isAuthenticated && (
-              <NavItem>
-                <NavLink href="/dashboard" className="nav-link">
-                  User Dashboard
-                </NavLink>
-              </NavItem>
-            )}
-            <NavItem>
-              <Button
-                color="danger"
-                href="/SignUp"
-                className="nav-button mx-4 px-4"
-              >
-                Sign Up
-              </Button>
-            </NavItem>
           </Nav>
         </Collapse>
       </Navbar>
