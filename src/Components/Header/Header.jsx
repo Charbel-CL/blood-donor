@@ -92,11 +92,18 @@ function Header({ homeRef, aboutRef, contactRef }) {
                   </Link>
                 </NavItem>
                 {isAuthenticated && (
-                  <NavItem>
-                    <NavLink href="/dashboard" className="nav-link">
-                      User Dashboard
-                    </NavLink>
-                  </NavItem>
+                  <>
+                    <NavItem>
+                      <NavLink href="/dashboard" className="nav-link">
+                        User Dashboard
+                      </NavLink>
+                    </NavItem>
+                    <NavItem>
+                      <NavLink href="/donation-history" className="nav-link">
+                        History
+                      </NavLink>
+                    </NavItem>
+                  </>
                 )}
                 <NavItem>
                   <Button

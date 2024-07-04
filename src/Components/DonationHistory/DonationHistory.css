@@ -1,0 +1,31 @@
+.container-history {
+  background-color: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.container-history {
+  padding: 20px 0;
+  background-color: #f8f9fa;
+}
+
+.history-paper {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.total-donations {
+  margin-bottom: 20px;
+}
+
+.donation-item {
+  margin-bottom: 20px;
+}
+
+.donation-card {
+  width: 100%;
+  background-color: #ffffff;
+}

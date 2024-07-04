@@ -14,6 +14,8 @@ import HowItWorks from "./Components/HowItWorks/HowItWorks";
 import Statistics from "./Components/Statistics/Statistics";
 import DonationForm from "./Components/DonationForm/DonationForm";
 import TimeSlotSelection from "./Components/TimeSlotSelection/TimeSlotSelection";
+import DonationHistory from "./Components/DonationHistory/DonationHistory";
+import AdminPage from "./Components/Admin/AdminPage";
 
 function App() {
   const homeRef = useRef(null);
@@ -46,6 +48,9 @@ function App() {
           />
           <Route path="/donation-form" element={<DonationForm />} />
           <Route path="/timeslots" element={<TimeSlotSelection />} />
+          <Route path="/donation-history" element={<DonationHistory />} />
+          <Route path="/admin" element={<AdminPage />} />
+
         </Routes>
       </div>
     </Router>
