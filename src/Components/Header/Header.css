@@ -1,8 +1,8 @@
 
 .navbar {
   padding-top: 52px;
-  padding-bottom: 5px;
-  height: 100px;
+  padding-bottom: 20px;
+  height: 80px;
 }
 .container-fluid{
   height: 150px;
@@ -58,7 +58,7 @@
   background-color: red;
   color: white;
   cursor: pointer;
-  font-size: 20px !important;
+  font-size: 15px !important;
   transition: background-color 0.3s ease;
 }
 

@@ -12,15 +12,15 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { useNavigate } from "react-router-dom";
 import usePost from "../../Hooks/usePost";
 import GraphicSide from "../../assets/GraphicSide.png";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import { useAuth } from "../../Context/AuthContext";
 
 function Login() {
-  const [query, setQuery] = useState(
-    window.matchMedia("(min-width: 1280px)").matches
-  );
+  const navigate = useNavigate();
+  const { login } = useAuth(); 
   const { data, loading, postData, error } = usePost();
   const [user, setUser] = useState({
     email: "",
@@ -30,13 +30,6 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState("");
   const [showButton, setShowButton] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    window
-      .matchMedia("(min-width: 1280px)")
-      .addEventListener("change", (e) => setQuery(e.matches));
-  }, []);
 
   useEffect(() => {
     setShowButton(user.email !== "" && user.password !== "");
@@ -61,9 +54,10 @@ function Login() {
 
   useEffect(() => {
     if (data) {
-      // Handle successful login here (e.g., save token, redirect user)
+      // Handle successful login here
       console.log("Login successful", data);
-      navigate("/dashboard"); // Redirect to dashboard on successful login
+      login(); // Set the authentication state to true
+      navigate("/dashboard"); // Redirect to the dashboard
     } else if (error) {
       if (error === "Invalid email or password") {
         setFormError("Invalid email or password. Please try again.");
@@ -71,7 +65,7 @@ function Login() {
         setFormError("An error occurred. Please try again later.");
       }
     }
-  }, [data, error, navigate]);
+  }, [data, error, login, navigate]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 items-center h-screen bg-white">
@@ -137,9 +131,7 @@ function Login() {
           />
         )}
       </form>
-      {query && (
-        <img src={GraphicSide} className="w-full h-screen" alt="Graphic Side" />
-      )}
+      <img src={GraphicSide} className="w-full h-screen" alt="Graphic Side" />
     </div>
   );
 }

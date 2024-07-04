@@ -165,7 +165,7 @@ const UserDashboard = () => {
   });
 
   return (
-    <div className="dashboard-wrapper mt-32">
+    <div className="dashboard-wrapper mt-20">
       <Container className="content-container">
         <Typography variant="h4" component="h1" gutterBottom className="mt-4">
           Blood Requests

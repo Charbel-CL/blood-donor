@@ -16,44 +16,43 @@ import DonationForm from "./Components/DonationForm/DonationForm";
 import TimeSlotSelection from "./Components/TimeSlotSelection/TimeSlotSelection";
 import DonationHistory from "./Components/DonationHistory/DonationHistory";
 import AdminPage from "./Components/Admin/AdminPage";
+import { AuthProvider } from "./Context/AuthContext";
 
 function App() {
   const homeRef = useRef(null);
   const aboutRef = useRef(null);
   const contactRef = useRef(null);
-  const isAuthenticated = true;
 
   return (
-    <Router>
-      <div>
-        <Header isAuthenticated={isAuthenticated} />
-        <Routes>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          {isAuthenticated && (
+    <AuthProvider> 
+      <Router>
+        <div>
+          <Header />
+          <Routes>
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<UserDashboard />} />
-          )}
-          <Route
-            path="/"
-            element={
-              <>
-                <Landing />
-                <MyCarousel />
-                <Testimonials />
-                <HowItWorks />
-                <Statistics />
-                <Footer />
-              </>
-            }
-          />
-          <Route path="/donation-form" element={<DonationForm />} />
-          <Route path="/timeslots" element={<TimeSlotSelection />} />
-          <Route path="/donation-history" element={<DonationHistory />} />
-          <Route path="/admin" element={<AdminPage />} />
-
-        </Routes>
-      </div>
-    </Router>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Landing />
+                  <MyCarousel />
+                  <Testimonials />
+                  <HowItWorks />
+                  <Statistics />
+                  <Footer />
+                </>
+              }
+            />
+            <Route path="/donation-form" element={<DonationForm />} />
+            <Route path="/timeslots" element={<TimeSlotSelection />} />
+            <Route path="/donation-history" element={<DonationHistory />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
