@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useNavigate } from "react-router-dom";
 import usePost from "../../Hooks/usePost";
 import GraphicSide from "../../assets/GraphicSide.png";
 import "./Login.css";
@@ -29,6 +30,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState("");
   const [showButton, setShowButton] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     window
@@ -51,8 +53,25 @@ function Login() {
 
   const submitLogIn = (e) => {
     e.preventDefault();
-    postData("/auth/signin", user);
+    postData("/api/Users/signin", {
+      email: user.email,
+      password: user.password,
+    });
   };
+
+  useEffect(() => {
+    if (data) {
+      // Handle successful login here (e.g., save token, redirect user)
+      console.log("Login successful", data);
+      navigate("/dashboard"); // Redirect to dashboard on successful login
+    } else if (error) {
+      if (error === "Invalid email or password") {
+        setFormError("Invalid email or password. Please try again.");
+      } else {
+        setFormError("An error occurred. Please try again later.");
+      }
+    }
+  }, [data, error, navigate]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 items-center h-screen bg-white">
@@ -121,7 +140,6 @@ function Login() {
       {query && (
         <img src={GraphicSide} className="w-full h-screen" alt="Graphic Side" />
       )}
-
     </div>
   );
 }
