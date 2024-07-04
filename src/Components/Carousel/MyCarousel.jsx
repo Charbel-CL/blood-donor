@@ -71,7 +71,7 @@ function MyCarousel(args) {
       activeIndex={activeIndex}
       next={next}
       previous={previous}
-      interval={5000}
+      interval={3000}
       className="custom-carousel"
       {...args}
     >

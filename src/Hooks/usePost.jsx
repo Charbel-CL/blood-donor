@@ -12,13 +12,17 @@ function usePost() {
             const response = await fetch(`http://localhost:5212${url}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application    /json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(postData),
             });
             const result = await response.json();
             if (!response.ok) {
-                throw new Error(result.message || 'Something went wrong');
+                if (response.status === 409) {
+                    throw new Error('Email already exists');
+                } else {
+                    throw new Error(result.message || 'Something went wrong');
+                }
             }
             setData(result);
         } catch (err) {

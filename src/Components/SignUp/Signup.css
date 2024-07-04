@@ -11,3 +11,6 @@
   width: 100%;
 }
 
+.custom-date-picker {
+  width: 305px !important;
+}

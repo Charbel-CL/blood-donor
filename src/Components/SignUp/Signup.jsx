@@ -10,20 +10,23 @@ import Alert from "@mui/material/Alert";
 import usePost from "../../Hooks/usePost";
 import GraphicSide from "../../assets/GraphicSide.png";
 import "./Signup.css";
-
 import Box from "@mui/material/Box";
 import Autocomplete from "@mui/material/Autocomplete";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 function Signup() {
   const [customer, setCustomer] = useState({
     firstName: "",
     lastName: "",
     gender: "Male",
-    dob: "",
+    dob: null,
     email: "",
     password: "",
     confirmPassword: "",
     bloodType: "",
+    address: "",
   });
 
   const [responseMessage, setResponseMessage] = useState("");
@@ -77,30 +80,24 @@ function Signup() {
     setCustomer((prevState) => ({ ...prevState, [name]: value }));
   }
 
-  function handleDateChange(event) {
-    event.target.max = new Date().toISOString().split("T")[0];
-    setCustomer({
-      ...customer,
-      dob: event.target.value,
-    });
-  }
-
-  const handleDateBlur = (event) => {
-    const selectedDate = new Date(event.target.value);
+  function handleDateChange(date) {
     const minDate = new Date();
     const maxDate = new Date();
-    minDate.setFullYear(minDate.getFullYear() - 99);
-    maxDate.setFullYear(maxDate.getFullYear() - 4);
-    if (selectedDate <= minDate) {
+    minDate.setFullYear(minDate.getFullYear() - 100);
+    maxDate.setFullYear(maxDate.getFullYear() - 12);
+    const selectedDate = new Date(date);
+
+    if (!date) {
+      setDobError("Date of birth is required");
+    } else if (selectedDate <= minDate) {
       setDobError("Your age should be less than 100 years old");
-      event.target.value = "";
     } else if (selectedDate >= maxDate) {
-      setDobError("Your age should be more than 4 years old");
-      event.target.value = "";
+      setDobError("Your age should be at least 12 years old");
     } else {
       setDobError("");
     }
-  };
+    setCustomer({ ...customer, dob: date });
+  }
 
   function validateEmail(event) {
     const email = event.target.value;
@@ -121,7 +118,7 @@ function Signup() {
         setResponseMessage("Account Created successfully");
 
         setTimeout(() => {
-          window.location.href = "/EmailVerification?email=" + customer.email;
+          window.location.href = "/login";
         }, 1000);
       }
     }
@@ -192,13 +189,13 @@ function Signup() {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row md:space-x-7 space-y-4 md:space-y-0 mt-5 ">
+          <div className="flex flex-col md:flex-row md:space-x-7 space-y-4 md:space-y-0 mt-5">
             <FormControl className="md:w-auto flex-1">
               <h2
                 id="demo-row-radio-buttons-group-label"
                 className="text-sm md:text-lg "
               >
-                gender Identification*{" "}
+                Gender Identification*{" "}
               </h2>
               <RadioGroup
                 row
@@ -219,19 +216,24 @@ function Signup() {
                 />
               </RadioGroup>
             </FormControl>
-            <TextField
-              type="date"
-              variant="outlined"
-              className="px-2 py-2 flex-1"
-              value={customer.dob}
-              onChange={handleDateChange}
-              onBlur={handleDateBlur}
-              error={!!dobError}
-              helperText={dobError}
-              required
-            />
+            <Box sx={{ flex: 1 }}>
+              <DatePicker
+                selected={customer.dob}
+                onChange={(date) => handleDateChange(date)}
+                dateFormat="MM/dd/yyyy"
+                customInput={
+                  <TextField
+                    label="Date of Birth"
+                    error={!!dobError}
+                    helperText={dobError || " "}
+                    required
+                    fullWidth
+                    className="custom-date-picker"
+                  />
+                }
+              />
+            </Box>
           </div>
-
           <div className="flex flex-row mt-5 space-x-5 pl-0  ">
             <TextField
               error={emailError}
@@ -336,18 +338,14 @@ function Signup() {
           </div>
 
           <div className="flex flex-col justify-center items-center gap-4 ">
-            {error && (
-              <Alert severity="error">
-                Error occurred while sending the request
-              </Alert>
-            )}
+            {error && <Alert severity="error">{error}</Alert>}
             {data && <Alert severity="info">{responseMessage}</Alert>}
             {loading ? (
               <CircularProgress color="secondary" />
             ) : (
               <input
                 type="submit"
-                className={`bg-[##e63946] text-white rounded-full px-10 py-2.5   ${
+                className={`bg-[#e63946] text-white rounded-full px-10 py-2.5 ${
                   isButtonEnabled
                     ? "bg-[#e63946] cursor-pointer"
                     : "bg-gray-500 cursor-not-allowed"
