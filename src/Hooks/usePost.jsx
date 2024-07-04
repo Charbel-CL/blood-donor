@@ -9,17 +9,20 @@ function usePost() {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(url, {
+            const response = await fetch(`http://localhost:5212${url}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application    /json',
                 },
                 body: JSON.stringify(postData),
             });
             const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Something went wrong');
+            }
             setData(result);
         } catch (err) {
-            setError(err);
+            setError(err.message);
         } finally {
             setLoading(false);
         }

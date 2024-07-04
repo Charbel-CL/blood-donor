@@ -23,7 +23,7 @@ function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    bloodType: "", 
+    bloodType: "",
   });
 
   const [responseMessage, setResponseMessage] = useState("");
@@ -52,7 +52,7 @@ function Signup() {
         customer.firstName !== "" &&
         customer.lastName !== "" &&
         customer.password !== "" &&
-        customer.bloodType !== "" 
+        customer.bloodType !== ""
     );
   }, [dobError, errorPassword, isChecked, customer]);
 
@@ -134,14 +134,16 @@ function Signup() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isButtonEnabled) {
-      postData("/auth/signup", {
+      postData("/api/Users/signup", {
+        email: customer.email,
+        password_hash: customer.password,
         first_name: customer.firstName,
         last_name: customer.lastName,
-        gender_identification: customer.gender,
-        date_of_birth: customer.dob,
-        email: customer.email,
-        password: customer.password,
-        blood_type: customer.bloodType,
+        dob: customer.dob,
+        gender: customer.gender,
+        address: customer.address,
+        bloodType: customer.bloodType,
+        role: "Donor",
       });
     }
   };
@@ -157,7 +159,10 @@ function Signup() {
       ) : (
         ""
       )}
-      <form onSubmit={handleSubmit} className="bg-white max-w-full h-full signup">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white max-w-full h-full signup"
+      >
         <div className="text-center p-5 mt-3">
           <h1 className="text-5xl p-3">Profile Setup</h1>
           <span className="text-2xl">Create your account</span>
@@ -246,9 +251,12 @@ function Signup() {
           <div className="flex flex-col md:flex-row md:space-x-7 space-y-4 md:space-y-0 mt-5">
             <Autocomplete
               id="blood-type-select"
-              className="w-full" 
-              options={bloodTypes} 
+              className="w-full"
+              options={bloodTypes}
               getOptionLabel={(option) => option.label}
+              isOptionEqualToValue={(option, value) =>
+                option.code === value.code
+              }
               renderOption={(props, option) => (
                 <Box
                   component="li"
