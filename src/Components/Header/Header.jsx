@@ -13,23 +13,19 @@ import "./Header.css";
 import logo from "../../assets/blood-donor-logo.png";
 import { Link } from "react-scroll";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../Context/AuthContext"; // Adjust the path as needed
+import { useAuth } from "../../Context/AuthContext";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState("");
-  const { isAuthenticated, logout } = useAuth(); // Use the Auth Context
+  const { isAuthenticated, logout } = useAuth();
 
   const toggle = () => setIsOpen(!isOpen);
 
   const handleSetActive = (link) => {
     setActiveLink(link);
-  };
-
-  const handleNavigateAndScroll = () => {
-    navigate("/");
   };
 
   const handleLogout = () => {
@@ -38,7 +34,7 @@ function Header() {
   };
 
   const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/signup";
+    location.pathname === "/login" || location.pathname === "/signup" || location.pathname === "/donation-history";
   const isRestrictedPage =
     location.pathname === "/dashboard" ||
     location.pathname === "/donation-form" ||
@@ -72,13 +68,23 @@ function Header() {
                   </NavLink>
                 </NavItem>
                 <NavItem>
-                  <Button color="danger" className="nav-button mx-4 px-4" onClick={handleLogout}>
+                  <NavLink href="/donation-history" className="nav-link">
+                    History
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <Button
+                    color="danger"
+                    className="nav-button mx-4 px-4"
+                    onClick={handleLogout}
+                  >
                     Log Out
                   </Button>
                 </NavItem>
               </>
             ) : (
-              !isRestrictedPage && !isAuthPage && (
+              !isRestrictedPage &&
+              !isAuthPage && (
                 <>
                   <NavItem>
                     <Link

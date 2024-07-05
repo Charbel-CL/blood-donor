@@ -20,7 +20,7 @@ import { useAuth } from "../../Context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth(); 
+  const { login } = useAuth();
   const { data, loading, postData, error } = usePost();
   const [user, setUser] = useState({
     email: "",
@@ -54,10 +54,9 @@ function Login() {
 
   useEffect(() => {
     if (data) {
-      // Handle successful login here
       console.log("Login successful", data);
-      login(); // Set the authentication state to true
-      navigate("/dashboard"); // Redirect to the dashboard
+      login();
+      navigate("/dashboard");
     } else if (error) {
       if (error === "Invalid email or password") {
         setFormError("Invalid email or password. Please try again.");

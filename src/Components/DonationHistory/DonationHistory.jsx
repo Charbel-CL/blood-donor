@@ -10,7 +10,7 @@ import {
   Card,
   CardContent,
   Divider,
-  Box
+  Box,
 } from "@mui/material";
 import "./DonationHistory.css";
 
@@ -19,7 +19,6 @@ const DonationHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call to fetch donation history
     setTimeout(() => {
       setHistory([
         {
@@ -44,12 +43,22 @@ const DonationHistory = () => {
           Donation History
         </Typography>
         {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="50vh"
+          >
             <CircularProgress />
           </Box>
         ) : (
           <Paper elevation={3} className="history-paper">
-            <Typography variant="h6" component="h2" gutterBottom className="total-donations">
+            <Typography
+              variant="h6"
+              component="h2"
+              gutterBottom
+              className="total-donations"
+            >
               Total Donations: {history.length}
             </Typography>
             <Divider />
