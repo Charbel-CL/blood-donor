@@ -17,20 +17,52 @@ import {
   List,
   ListItem,
   ListItemText,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import axios from "axios";
 import "./TimeSlotSelection.css";
 
-const TimeSlotSelection = () => {
+const TimeSlotSelection = ({ hospital_id }) => {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [hospitals, setHospitals] = useState([]);
+  const [selectedHospitalId, setSelectedHospitalId] = useState("");
+  const [bloodRequests, setBloodRequests] = useState([]);
+  const [selectedRequestId, setSelectedRequestId] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchHospitals();
+    fetchBloodRequests();
+  }, []);
+
+  const fetchHospitals = async () => {
+    try {
+      const response = await axios.get("http://localhost:5212/api/Hospitals");
+      setHospitals(response.data);
+    } catch (error) {
+      console.error("Error fetching hospitals:", error);
+    }
+  };
+
+  const fetchBloodRequests = async () => {
+    try {
+      const response = await axios.get("http://localhost:5212/api/BloodRequests");
+      setBloodRequests(response.data);
+    } catch (error) {
+      console.error("Error fetching blood requests:", error);
+    }
+  };
 
   useEffect(() => {
     if (selectedDateTime !== null) {
@@ -39,8 +71,8 @@ const TimeSlotSelection = () => {
   }, [selectedDateTime]);
 
   const handleBooking = () => {
-    if (!selectedDateTime || validationError) {
-      setValidationError("Please select a valid date and time.");
+    if (!selectedDateTime || validationError || !selectedHospitalId || !selectedRequestId) {
+      setValidationError("Please select a valid date, time, hospital, and blood request.");
       return;
     }
 
@@ -55,10 +87,31 @@ const TimeSlotSelection = () => {
     }, 1000);
   };
 
-  const handleConfirmBooking = () => {
-    setOpenDialog(false);
-    alert("Your request is pending and will be approved by the hospital.");
-    navigate("/dashboard", { state: { dateTime: selectedDateTime } });
+  const handleConfirmBooking = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setErrorMessage("You need to be logged in to confirm the booking.");
+      return;
+    }
+
+    const bookingData = {
+      user_id: user.user_id,
+      hospital_id: selectedHospitalId,
+      request_id: selectedRequestId,
+      blood_type: user.bloodType, // Assuming bloodType is stored in user
+      quantity: 1, // Assuming quantity, you should fetch or determine this dynamically as needed
+      donation_date: selectedDateTime.toISOString(),
+    };
+
+    try {
+      await axios.post("http://localhost:5212/api/BloodDonations", bookingData);
+      setOpenDialog(false);
+      alert("Your request is pending and will be approved by the hospital.");
+      navigate("/dashboard", { state: { dateTime: selectedDateTime } });
+    } catch (error) {
+      console.error("Error saving booking:", error);
+      setErrorMessage("An error occurred while saving your booking. Please try again.");
+    }
   };
 
   const validateDateTime = (dateTime) => {
@@ -77,12 +130,44 @@ const TimeSlotSelection = () => {
     <div className="time-container">
       <Container className="timeslot-selection mt-40">
         <Typography variant="h4" component="h1" gutterBottom>
-          Select a Date and Time for Donation
+          Select a Date, Time, and Hospital for Donation
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Please select a suitable date and time for your donation. Ensure you
+          Please select a suitable date, time, hospital, and blood request for your donation. Ensure you
           are well-prepared and have followed all pre-donation guidelines.
         </Typography>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="hospital-select-label">Select Hospital</InputLabel>
+          <Select
+            labelId="hospital-select-label"
+            value={selectedHospitalId}
+            onChange={(e) => setSelectedHospitalId(e.target.value)}
+            label="Select Hospital"
+          >
+            {hospitals.map((hospital) => (
+              <MenuItem key={hospital.hospital_id} value={hospital.hospital_id}>
+                {hospital.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="request-select-label">Select Blood Request</InputLabel>
+          <Select
+            labelId="request-select-label"
+            value={selectedRequestId}
+            onChange={(e) => setSelectedRequestId(e.target.value)}
+            label="Select Blood Request"
+          >
+            {bloodRequests.map((request) => (
+              <MenuItem key={request.request_id} value={request.request_id}>
+                {request.blood_type} - {request.quantity} units
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div className="mb-8 mt-8">
