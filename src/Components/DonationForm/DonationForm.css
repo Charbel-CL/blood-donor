@@ -69,6 +69,12 @@
   animation: shake 0.5s;
 }
 
+.breadcrumbs{
+  position: absolute;
+  top: 100px;
+  left: 100px;
+}
+
 @keyframes shake {
   0% { transform: translateX(0); }
   25% { transform: translate(-5px); }

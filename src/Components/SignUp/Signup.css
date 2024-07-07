@@ -14,3 +14,9 @@
 .custom-date-picker {
   width: 305px !important;
 }
+
+@media (max-width: 768px) {
+  .custom-date-picker {
+    width: 470px !important;
+  }
+}

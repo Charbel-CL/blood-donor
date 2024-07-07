@@ -13,8 +13,9 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { NavLink } from "react-router-dom";
 import "./DonationForm.css";
 
 const DonationForm = () => {
@@ -196,6 +197,12 @@ const DonationForm = () => {
     navigate("/timeslots");
   };
 
+  const handleDashboardClick = () => {
+    localStorage.removeItem(`currentStep_${user.user_id}`);
+    localStorage.removeItem(`answers_${user.user_id}`);
+    navigate(-1); // Go back to the previous page
+  };
+
   if (loading) {
     return (
       <Box
@@ -211,6 +218,9 @@ const DonationForm = () => {
 
   return (
     <div className="container-questions">
+      <div className="breadcrumbs">
+        <NavLink to="#" onClick={handleDashboardClick}>Dashboard</NavLink> &gt; Donation Form
+      </div>
       <div className="form-wrapper">
         <h1 className="form-title">Donation Eligibility Form</h1>
         <div className="progress-bar">
