@@ -1,10 +1,10 @@
-
 .navbar {
   padding-top: 52px;
   padding-bottom: 20px;
   height: 80px;
+  position: relative; 
 }
-.container-fluid{
+.container-fluid {
   height: 150px;
   padding-bottom: 10px !important;
 }
@@ -62,21 +62,48 @@
   transition: background-color 0.3s ease;
 }
 
-
-
 .nav-button:hover {
   background-color: darkred;
 }
-.blood-donor-logo{
-  padding-top: 20px;
+
+.blood-donor-logo {
+  padding-top: 30px;
 }
-@media (max-width : 768px){
-  .container-fluid{
+
+@media (max-width: 768px) {
+  .container-fluid {
     padding-bottom: 110px;
   }
-  .blood-donor-logo{
+  .blood-donor-logo {
     padding-top: 2px;
   }
-  
 
+  .container-fluid {
+    margin: -26px;
+    padding: 0px;
+  }
+
+  .navbar-collapse {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    width: 100%;
+    background-color: #333; 
+    padding: 20px;
+    z-index: 1;
+  }
+
+  .nav-link {
+    background-color: #333; 
+    padding: 10px 15px;
+    margin-right: 0;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+
+  .nav-link:hover,
+  .nav-link:focus,
+  .nav-link:active {
+    background-color: #555; 
+  }
 }

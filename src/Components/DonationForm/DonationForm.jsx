@@ -18,26 +18,34 @@ import { useNavigate } from "react-router-dom";
 import "./DonationForm.css";
 
 const DonationForm = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
   const [currentStep, setCurrentStep] = useState(() => {
-    return parseInt(localStorage.getItem("currentStep")) || 0;
+    const userCurrentStep = localStorage.getItem(`currentStep_${user.user_id}`);
+    return parseInt(userCurrentStep) || 0;
   });
   const [questions, setQuestions] = useState([]);
   const [bloodRequests, setBloodRequests] = useState([]);
   const [answers, setAnswers] = useState(() => {
-    return JSON.parse(localStorage.getItem("answers")) || {};
+    const userAnswers = localStorage.getItem(`answers_${user.user_id}`);
+    return JSON.parse(userAnswers) || {};
   });
   const [eligibilityMessage, setEligibilityMessage] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchQuestionsAndRequests = async () => {
       try {
-        const questionsResponse = await axios.get("http://localhost:5212/api/Questions");
+        const questionsResponse = await axios.get(
+          "http://localhost:5212/api/Questions"
+        );
         setQuestions(questionsResponse.data);
 
-        const bloodRequestsResponse = await axios.get("http://localhost:5212/api/BloodRequests");
+        const bloodRequestsResponse = await axios.get(
+          "http://localhost:5212/api/BloodRequests"
+        );
         setBloodRequests(bloodRequestsResponse.data);
 
         setLoading(false);
@@ -51,9 +59,9 @@ const DonationForm = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("currentStep", currentStep);
-    localStorage.setItem("answers", JSON.stringify(answers));
-  }, [currentStep, answers]);
+    localStorage.setItem(`currentStep_${user.user_id}`, currentStep);
+    localStorage.setItem(`answers_${user.user_id}`, JSON.stringify(answers));
+  }, [currentStep, answers, user.user_id]);
 
   useEffect(() => {
     if (answers[questions[currentStep]?.question_id]) {
@@ -62,7 +70,7 @@ const DonationForm = () => {
         answers[questions[currentStep].question_id]
       );
     }
-  }, [currentStep]);
+  }, [currentStep, questions, answers]);
 
   const handleChange = (event, id) => {
     const newAnswers = {
@@ -75,7 +83,7 @@ const DonationForm = () => {
   };
 
   const handleNext = () => {
-    if (!eligibilityMessage && answers[questions[currentStep].question_id]) {
+    if (!eligibilityMessage && answers[questions[currentStep]?.question_id]) {
       if (currentStep < questions.length - 1) {
         setCurrentStep(currentStep + 1);
         setEligibilityMessage("");
@@ -141,16 +149,17 @@ const DonationForm = () => {
   };
 
   const handleSubmit = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      setDialogMessage("You need to be logged in to submit the form.");
+      setErrorMessage("You need to be logged in to submit the form.");
       setOpenDialog(true);
       return;
     }
 
-    const selectedRequest = bloodRequests.find(req => req.blood_type === user.bloodType && req.status === 'Pending');
+    const selectedRequest = bloodRequests.find(
+      (req) => req.blood_type === user.bloodType && req.status === "Pending"
+    );
     if (!selectedRequest) {
-      setDialogMessage("No matching blood request found.");
+      setErrorMessage("No matching blood request found.");
       setOpenDialog(true);
       return;
     }
@@ -169,11 +178,16 @@ const DonationForm = () => {
         "http://localhost:5212/api/PatientQuestions",
         submissionData
       );
-      localStorage.removeItem("currentStep");
-      localStorage.removeItem("answers");
+      localStorage.removeItem(`currentStep_${user.user_id}`);
+      localStorage.removeItem(`answers_${user.user_id}`);
+      setErrorMessage(""); // Clear the error message on successful submission
       setOpenDialog(true);
     } catch (error) {
       console.error("Error submitting responses:", error);
+      setErrorMessage(
+        "An error occurred while submitting your responses. Please try again."
+      );
+      setOpenDialog(true);
     }
   };
 
@@ -228,6 +242,7 @@ const DonationForm = () => {
         {eligibilityMessage && (
           <p className="eligibility-message">{eligibilityMessage}</p>
         )}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
         <div className="navigation-buttons">
           <Button
             variant="contained"
@@ -255,7 +270,9 @@ const DonationForm = () => {
         <DialogTitle>Form Submission</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Your form has been submitted successfully!
+            {errorMessage
+              ? errorMessage
+              : "Your form has been submitted successfully!"}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
