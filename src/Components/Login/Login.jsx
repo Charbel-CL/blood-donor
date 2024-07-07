@@ -56,6 +56,7 @@ function Login() {
     if (data) {
       console.log("Login successful", data);
       login();
+      localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/dashboard");
     } else if (error) {
       if (error === "Invalid email or password") {
@@ -69,7 +70,7 @@ function Login() {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 items-center h-screen bg-white">
       <form
-        className="flex flex-col justify-center items-center gap-8"
+        className="login-container"
         onSubmit={submitLogIn}
       >
         <h1 className="text-3xl font-semibold">Sign In</h1>
@@ -130,7 +131,7 @@ function Login() {
           />
         )}
       </form>
-      <img src={GraphicSide} className="w-full h-screen" alt="Graphic Side" />
+      <img src={GraphicSide} className="login-image" alt="Graphic Side" />
     </div>
   );
 }
