@@ -10,33 +10,45 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress,
+  Box,
 } from "@mui/material";
-import "./DonationForm.css";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-const questions = [
-  { id: 1, question: "Are you between 18 and 65 years old?" },
-  { id: 2, question: "Do you weigh at least 50 kg?" },
-  { id: 3, question: "Are you in good health?" },
-  { id: 4, question: "Have you traveled outside the country recently?" },
-  { id: 5, question: "Do you have a chronic illness?" },
-  { id: 6, question: "Have you had any recent surgeries?" },
-  { id: 7, question: "Are you taking any medication?" },
-  { id: 8, question: "Have you ever tested positive for HIV?" },
-  { id: 9, question: "Have you received any blood transfusions?" },
-  { id: 10, question: "Do you have any symptoms of cold or flu?" },
-];
+import "./DonationForm.css";
 
 const DonationForm = () => {
   const [currentStep, setCurrentStep] = useState(() => {
     return parseInt(localStorage.getItem("currentStep")) || 0;
   });
+  const [questions, setQuestions] = useState([]);
+  const [bloodRequests, setBloodRequests] = useState([]);
   const [answers, setAnswers] = useState(() => {
     return JSON.parse(localStorage.getItem("answers")) || {};
   });
   const [eligibilityMessage, setEligibilityMessage] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchQuestionsAndRequests = async () => {
+      try {
+        const questionsResponse = await axios.get("http://localhost:5212/api/Questions");
+        setQuestions(questionsResponse.data);
+
+        const bloodRequestsResponse = await axios.get("http://localhost:5212/api/BloodRequests");
+        setBloodRequests(bloodRequestsResponse.data);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchQuestionsAndRequests();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("currentStep", currentStep);
@@ -44,10 +56,10 @@ const DonationForm = () => {
   }, [currentStep, answers]);
 
   useEffect(() => {
-    if (answers[questions[currentStep].id]) {
+    if (answers[questions[currentStep]?.question_id]) {
       checkEligibilityForCurrentStep(
-        questions[currentStep].id,
-        answers[questions[currentStep].id]
+        questions[currentStep].question_id,
+        answers[questions[currentStep].question_id]
       );
     }
   }, [currentStep]);
@@ -59,12 +71,11 @@ const DonationForm = () => {
     };
     setAnswers(newAnswers);
 
-    // Check eligibility immediately after answer change
     checkEligibilityForCurrentStep(id, event.target.value);
   };
 
   const handleNext = () => {
-    if (!eligibilityMessage && answers[questions[currentStep].id]) {
+    if (!eligibilityMessage && answers[questions[currentStep].question_id]) {
       if (currentStep < questions.length - 1) {
         setCurrentStep(currentStep + 1);
         setEligibilityMessage("");
@@ -129,13 +140,41 @@ const DonationForm = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Clear local storage
-    localStorage.removeItem("currentStep");
-    localStorage.removeItem("answers");
+  const handleSubmit = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setDialogMessage("You need to be logged in to submit the form.");
+      setOpenDialog(true);
+      return;
+    }
 
-    // Open the confirmation dialog
-    setOpenDialog(true);
+    const selectedRequest = bloodRequests.find(req => req.blood_type === user.bloodType && req.status === 'Pending');
+    if (!selectedRequest) {
+      setDialogMessage("No matching blood request found.");
+      setOpenDialog(true);
+      return;
+    }
+
+    const submissionData = questions.map((question) => ({
+      question_id: question.question_id,
+      user_id: user.user_id,
+      request_id: selectedRequest.request_id,
+      question_text: question.question_text,
+      response: answers[question.question_id],
+      response_date: new Date(),
+    }));
+
+    try {
+      await axios.post(
+        "http://localhost:5212/api/PatientQuestions",
+        submissionData
+      );
+      localStorage.removeItem("currentStep");
+      localStorage.removeItem("answers");
+      setOpenDialog(true);
+    } catch (error) {
+      console.error("Error submitting responses:", error);
+    }
   };
 
   const handleDialogClose = () => {
@@ -143,6 +182,18 @@ const DonationForm = () => {
     navigate("/timeslots");
   };
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <div className="container-questions">
@@ -155,19 +206,25 @@ const DonationForm = () => {
             className="progress-bar-style"
           />
         </div>
-        <div className="question-slide">
-          <h2 className="question-slide-title">Page {currentStep + 1}</h2>
-          <p className="quiz-question">{questions[currentStep].question}</p>
-          <RadioGroup
-            row
-            className="quiz-options"
-            onChange={(event) => handleChange(event, questions[currentStep].id)}
-            value={answers[questions[currentStep].id] || ""}
-          >
-            <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio />} label="No" />
-          </RadioGroup>
-        </div>
+        {questions.length > 0 && (
+          <div className="question-slide">
+            <h2 className="question-slide-title">Page {currentStep + 1}</h2>
+            <p className="quiz-question">
+              {questions[currentStep]?.question_text}
+            </p>
+            <RadioGroup
+              row
+              className="quiz-options"
+              onChange={(event) =>
+                handleChange(event, questions[currentStep].question_id)
+              }
+              value={answers[questions[currentStep]?.question_id] || ""}
+            >
+              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio />} label="No" />
+            </RadioGroup>
+          </div>
+        )}
         {eligibilityMessage && (
           <p className="eligibility-message">{eligibilityMessage}</p>
         )}
@@ -184,7 +241,10 @@ const DonationForm = () => {
             variant="contained"
             color="primary"
             onClick={handleNext}
-            disabled={!answers[questions[currentStep].id] || eligibilityMessage}
+            disabled={
+              !answers[questions[currentStep]?.question_id] ||
+              eligibilityMessage
+            }
           >
             {currentStep === questions.length - 1 ? "Submit" : "Next"}
           </Button>
@@ -194,7 +254,9 @@ const DonationForm = () => {
       <Dialog open={openDialog} onClose={handleDialogClose}>
         <DialogTitle>Form Submission</DialogTitle>
         <DialogContent>
-          <p>Your form has been submitted successfully!</p>
+          <DialogContentText>
+            Your form has been submitted successfully!
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="primary">
