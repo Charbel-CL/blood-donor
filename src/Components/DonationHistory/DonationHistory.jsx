@@ -71,12 +71,19 @@ const DonationHistory = () => {
                 <ListItem key={index} className="donation-item">
                   <Card className="donation-card" variant="outlined">
                     <CardContent>
+                    <Typography variant="body1">
+                        <strong>Hospital Name:</strong> {item.HospitalName}
+                      </Typography>
                       <Typography variant="body1">
                         <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
                       </Typography>
                       <Typography variant="body1">
-                        <strong>Location:</strong> {item.location}
+                        <strong>Time:</strong> {new Date(item.date).toLocaleTimeString()}
                       </Typography>
+                      <Typography variant="body1">
+                        <strong>Location:</strong> {item.Location}
+                      </Typography>
+                    
                     </CardContent>
                   </Card>
                 </ListItem>
