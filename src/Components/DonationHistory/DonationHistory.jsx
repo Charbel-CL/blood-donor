@@ -12,6 +12,7 @@ import {
   Divider,
   Box,
 } from "@mui/material";
+import axios from "axios";
 import "./DonationHistory.css";
 
 const DonationHistory = () => {
@@ -19,21 +20,24 @@ const DonationHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      setHistory([
-        {
-          date: "2023-06-01",
-          time: "10:00 AM",
-          location: "Hospital A",
-        },
-        {
-          date: "2023-05-01",
-          time: "11:00 AM",
-          location: "Hospital B",
-        },
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchDonationHistory = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          // Handle the case when the user is not logged in
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:5212/api/DonationHistory/user/${user.user_id}`);
+        setHistory(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching donation history:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchDonationHistory();
   }, []);
 
   return (
@@ -68,10 +72,7 @@ const DonationHistory = () => {
                   <Card className="donation-card" variant="outlined">
                     <CardContent>
                       <Typography variant="body1">
-                        <strong>Date:</strong> {item.date}
-                      </Typography>
-                      <Typography variant="body1">
-                        <strong>Time:</strong> {item.time}
+                        <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
                       </Typography>
                       <Typography variant="body1">
                         <strong>Location:</strong> {item.location}
