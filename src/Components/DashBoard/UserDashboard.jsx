@@ -281,14 +281,14 @@ const UserDashboard = () => {
                             >
                               Quantity: {request.quantity} units
                             </Typography>
-                            <Typography
-                              variant="body2"
-                              className={`status ${getStatusClass(
-                                request.status
-                              )}`}
-                            >
-                              Status: {request.status}
-                            </Typography>
+                            {request.status && (
+                              <Typography
+                                variant="body2"
+                                className={`status ${getStatusClass(request.status)}`}
+                              >
+                                Status: {request.status}
+                              </Typography>
+                            )}
                             <Button
                               variant="contained"
                               color="primary"

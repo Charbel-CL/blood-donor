@@ -157,7 +157,7 @@ const DonationForm = () => {
     }
 
     const selectedRequest = bloodRequests.find(
-      (req) => req.blood_type === user.bloodType && req.status === "Pending"
+      (req) => req.blood_type === user.bloodType 
     );
     if (!selectedRequest) {
       setErrorMessage("No matching blood request found.");
@@ -181,7 +181,7 @@ const DonationForm = () => {
       );
       localStorage.removeItem(`currentStep_${user.user_id}`);
       localStorage.removeItem(`answers_${user.user_id}`);
-      setErrorMessage(""); // Clear the error message on successful submission
+      setErrorMessage("");
       setOpenDialog(true);
     } catch (error) {
       console.error("Error submitting responses:", error);
@@ -195,7 +195,7 @@ const DonationForm = () => {
   const handleDialogClose = () => {
     setOpenDialog(false);
     const selectedRequest = bloodRequests.find(
-      (req) => req.blood_type === user.bloodType && req.status === "Pending"
+      (req) => req.blood_type === user.bloodType 
     );
     navigate(`/timeslots?hospitalId=${selectedRequest.hospital_id}&requestId=${selectedRequest.request_id}`);
   };
@@ -203,7 +203,7 @@ const DonationForm = () => {
   const handleDashboardClick = () => {
     localStorage.removeItem(`currentStep_${user.user_id}`);
     localStorage.removeItem(`answers_${user.user_id}`);
-    navigate(-1); // Go back to the previous page
+    navigate(-1);
   };
 
   if (loading) {
