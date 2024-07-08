@@ -20,7 +20,7 @@ import { useAuth } from "../../Context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, adminLogin } = useAuth();
   const { data, loading, postData, error } = usePost();
   const [user, setUser] = useState({
     email: "",
@@ -46,10 +46,16 @@ function Login() {
 
   const submitLogIn = (e) => {
     e.preventDefault();
-    postData("/api/Users/signin", {
-      email: user.email,
-      password: user.password,
-    });
+    if (user.email === "admin@example.com" && user.password === "admin123") {
+      adminLogin();
+      localStorage.setItem("admin", true);
+      navigate("/admin");
+    } else {
+      postData("/api/Users/signin", {
+        email: user.email,
+        password: user.password,
+      });
+    }
   };
 
   useEffect(() => {
@@ -69,10 +75,7 @@ function Login() {
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 items-center h-screen bg-white">
-      <form
-        className="login-container"
-        onSubmit={submitLogIn}
-      >
+      <form className="login-container" onSubmit={submitLogIn}>
         <h1 className="text-3xl font-semibold">Sign In</h1>
         <TextField
           type="email"
