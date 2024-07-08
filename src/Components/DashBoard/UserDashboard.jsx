@@ -23,7 +23,7 @@ import ReactStars from "react-rating-stars-component";
 import "./UserDashboard.css";
 import Footer from "../Footer/Footer";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const haversineDistance = (coords1, coords2) => {
   const toRad = (x) => (x * Math.PI) / 180;
@@ -57,6 +57,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -74,7 +75,7 @@ const UserDashboard = () => {
 
     const fetchHospitalsAndRequests = async () => {
       try {
-        const hospitalsResponse = await axios.get('http://localhost:5212/api/Hospitals');
+        const hospitalsResponse = await axios.get("http://localhost:5212/api/Hospitals");
         const hospitalsWithCoords = await Promise.all(
           hospitalsResponse.data.map(async (hospital) => {
             if (hospital.lat && hospital.lng) {
@@ -91,7 +92,7 @@ const UserDashboard = () => {
           })
         );
 
-        const bloodRequestsResponse = await axios.get('http://localhost:5212/api/BloodRequests');
+        const bloodRequestsResponse = await axios.get("http://localhost:5212/api/BloodRequests");
         setBloodRequests(bloodRequestsResponse.data);
         setHospitals(hospitalsWithCoords);
       } catch (error) {
@@ -122,8 +123,6 @@ const UserDashboard = () => {
   };
 
   const handleDonateClick = (hospitalId, requestId, requestBloodType) => {
-    // Fetch user data from local storage
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
       setDialogMessage("You need to be logged in to donate.");
       setOpenDialog(true);
@@ -161,7 +160,12 @@ const UserDashboard = () => {
       hospital.name.toLowerCase().includes(filter) ||
       hospital.address.toLowerCase().includes(filter) ||
       hospital.rating.toString().includes(filter) ||
-      bloodRequests.some(request => request.hospital_id === hospital.hospital_id && request.blood_type.toLowerCase().includes(filter))
+      bloodRequests.some(
+        (request) =>
+          request.hospital_id === hospital.hospital_id &&
+          request.blood_type.toLowerCase().includes(filter) &&
+          (!request.user_id || request.user_id === user.user_id)
+      )
     );
   });
 
@@ -281,7 +285,7 @@ const UserDashboard = () => {
                             >
                               Quantity: {request.quantity} units
                             </Typography>
-                            {request.status && (
+                            {request.user_id === user.user_id && request.status && (
                               <Typography
                                 variant="body2"
                                 className={`status ${getStatusClass(request.status)}`}
@@ -294,7 +298,11 @@ const UserDashboard = () => {
                               color="primary"
                               className="mt-4 m-8"
                               onClick={() =>
-                                handleDonateClick(hospital.hospital_id, request.request_id, request.blood_type)
+                                handleDonateClick(
+                                  hospital.hospital_id,
+                                  request.request_id,
+                                  request.blood_type
+                                )
                               }
                             >
                               Donate

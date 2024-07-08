@@ -81,7 +81,6 @@ const TimeSlotSelection = () => {
       }
     }, 1000);
   };
-
   const handleConfirmBooking = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
@@ -100,6 +99,16 @@ const TimeSlotSelection = () => {
 
     try {
       await axios.post("http://localhost:5212/api/BloodDonations", bookingData);
+
+      const updateRequestData = {
+        userId: user.user_id,
+        status: "Pending",
+      };
+      await axios.put(
+        `http://localhost:5212/api/BloodRequests/update/${requestId}`,
+        updateRequestData
+      );
+
       setOpenDialog(false);
       alert("Your request is pending and will be approved by the hospital.");
       navigate("/dashboard", { state: { dateTime: selectedDateTime } });
