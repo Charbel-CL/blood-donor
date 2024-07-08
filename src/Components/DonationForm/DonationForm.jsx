@@ -194,7 +194,10 @@ const DonationForm = () => {
 
   const handleDialogClose = () => {
     setOpenDialog(false);
-    navigate("/timeslots");
+    const selectedRequest = bloodRequests.find(
+      (req) => req.blood_type === user.bloodType && req.status === "Pending"
+    );
+    navigate(`/timeslots?hospitalId=${selectedRequest.hospital_id}&requestId=${selectedRequest.request_id}`);
   };
 
   const handleDashboardClick = () => {

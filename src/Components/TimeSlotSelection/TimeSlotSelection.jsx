@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -17,10 +17,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
@@ -29,38 +25,37 @@ import dayjs from "dayjs";
 import axios from "axios";
 import "./TimeSlotSelection.css";
 
-const TimeSlotSelection = ({ hospital_id }) => {
+const TimeSlotSelection = () => {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [validationError, setValidationError] = useState("");
-  const [hospitals, setHospitals] = useState([]);
-  const [selectedHospitalId, setSelectedHospitalId] = useState("");
-  const [bloodRequests, setBloodRequests] = useState([]);
-  const [selectedRequestId, setSelectedRequestId] = useState("");
+  const [hospital, setHospital] = useState({});
+  const [bloodRequest, setBloodRequest] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const hospitalId = params.get("hospitalId");
+  const requestId = params.get("requestId");
 
   useEffect(() => {
-    fetchHospitals();
-    fetchBloodRequests();
+    fetchHospitalAndRequestDetails();
   }, []);
 
-  const fetchHospitals = async () => {
+  const fetchHospitalAndRequestDetails = async () => {
     try {
-      const response = await axios.get("http://localhost:5212/api/Hospitals");
-      setHospitals(response.data);
-    } catch (error) {
-      console.error("Error fetching hospitals:", error);
-    }
-  };
+      const hospitalResponse = await axios.get(
+        `http://localhost:5212/api/Hospitals/${hospitalId}`
+      );
+      setHospital(hospitalResponse.data);
 
-  const fetchBloodRequests = async () => {
-    try {
-      const response = await axios.get("http://localhost:5212/api/BloodRequests");
-      setBloodRequests(response.data);
+      const requestResponse = await axios.get(
+        `http://localhost:5212/api/BloodRequests/${requestId}`
+      );
+      setBloodRequest(requestResponse.data);
     } catch (error) {
-      console.error("Error fetching blood requests:", error);
+      console.error("Error fetching details:", error);
     }
   };
 
@@ -71,8 +66,8 @@ const TimeSlotSelection = ({ hospital_id }) => {
   }, [selectedDateTime]);
 
   const handleBooking = () => {
-    if (!selectedDateTime || validationError || !selectedHospitalId || !selectedRequestId) {
-      setValidationError("Please select a valid date, time, hospital, and blood request.");
+    if (!selectedDateTime || validationError) {
+      setValidationError("Please select a valid date and time.");
       return;
     }
 
@@ -96,10 +91,10 @@ const TimeSlotSelection = ({ hospital_id }) => {
 
     const bookingData = {
       user_id: user.user_id,
-      hospital_id: selectedHospitalId,
-      request_id: selectedRequestId,
-      blood_type: user.bloodType, // Assuming bloodType is stored in user
-      quantity: 1, // Assuming quantity, you should fetch or determine this dynamically as needed
+      hospital_id: hospitalId,
+      request_id: requestId,
+      blood_type: user.bloodType,
+      quantity: 1,
       donation_date: selectedDateTime.toISOString(),
     };
 
@@ -110,7 +105,9 @@ const TimeSlotSelection = ({ hospital_id }) => {
       navigate("/dashboard", { state: { dateTime: selectedDateTime } });
     } catch (error) {
       console.error("Error saving booking:", error);
-      setErrorMessage("An error occurred while saving your booking. Please try again.");
+      setErrorMessage(
+        "An error occurred while saving your booking. Please try again."
+      );
     }
   };
 
@@ -120,7 +117,9 @@ const TimeSlotSelection = ({ hospital_id }) => {
       return;
     }
     if (dayjs(dateTime).isBefore(dayjs().add(2, "hour"))) {
-      setValidationError("You cannot choose a date and time earlier than 2 hours from now.");
+      setValidationError(
+        "You cannot choose a date and time earlier than 2 hours from now."
+      );
     } else {
       setValidationError("");
     }
@@ -130,44 +129,26 @@ const TimeSlotSelection = ({ hospital_id }) => {
     <div className="time-container">
       <Container className="timeslot-selection mt-40">
         <Typography variant="h4" component="h1" gutterBottom>
-          Select a Date, Time, and Hospital for Donation
+          Select a Date and Time for Donation
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Please select a suitable date, time, hospital, and blood request for your donation. Ensure you
+          Please select a suitable date and time for your donation. Ensure you
           are well-prepared and have followed all pre-donation guidelines.
         </Typography>
 
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="hospital-select-label">Select Hospital</InputLabel>
-          <Select
-            labelId="hospital-select-label"
-            value={selectedHospitalId}
-            onChange={(e) => setSelectedHospitalId(e.target.value)}
-            label="Select Hospital"
-          >
-            {hospitals.map((hospital) => (
-              <MenuItem key={hospital.hospital_id} value={hospital.hospital_id}>
-                {hospital.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="request-select-label">Select Blood Request</InputLabel>
-          <Select
-            labelId="request-select-label"
-            value={selectedRequestId}
-            onChange={(e) => setSelectedRequestId(e.target.value)}
-            label="Select Blood Request"
-          >
-            {bloodRequests.map((request) => (
-              <MenuItem key={request.request_id} value={request.request_id}>
-                {request.blood_type} - {request.quantity} units
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Typography variant="h6" component="h2" gutterBottom>
+          Hospital: {hospital.name}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          Address: {hospital.address}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          Blood Type Needed: {bloodRequest.blood_type}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          {/* Quantity: {bloodRequest.quantity} units */}
+          Quantity: 1 units
+        </Typography>
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <div className="mb-8 mt-8">
@@ -175,7 +156,7 @@ const TimeSlotSelection = ({ hospital_id }) => {
               label="Select Date and Time"
               value={selectedDateTime}
               onChange={(newValue) => setSelectedDateTime(newValue)}
-              minDate={dayjs()}  // Disable past dates
+              minDate={dayjs()}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -201,7 +182,9 @@ const TimeSlotSelection = ({ hospital_id }) => {
         </LocalizationProvider>
 
         {errorMessage && <Typography color="error">{errorMessage}</Typography>}
-        {validationError && <Typography color="error">{validationError}</Typography>}
+        {validationError && (
+          <Typography color="error">{validationError}</Typography>
+        )}
 
         <Box display="flex" flexDirection="column" alignItems="center">
           <Button
@@ -286,8 +269,9 @@ const TimeSlotSelection = ({ hospital_id }) => {
           <DialogTitle>Confirm Booking</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              You have selected {selectedDateTime?.format("MMMM DD, YYYY HH:mm")}.
-              Please confirm your booking.
+              You have selected{" "}
+              {selectedDateTime?.format("MMMM DD, YYYY HH:mm")}. Please confirm
+              your booking.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

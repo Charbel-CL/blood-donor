@@ -121,7 +121,7 @@ const UserDashboard = () => {
     setUseLocationFilter(event.target.checked);
   };
 
-  const handleDonateClick = (requestBloodType) => {
+  const handleDonateClick = (hospitalId, requestId, requestBloodType) => {
     // Fetch user data from local storage
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
@@ -138,7 +138,7 @@ const UserDashboard = () => {
     setOpenDialog(true);
 
     if (compatible) {
-      navigate('/donation-form');
+      navigate(`/donation-form?hospitalId=${hospitalId}&requestId=${requestId}`);
     }
   };
 
@@ -294,7 +294,7 @@ const UserDashboard = () => {
                               color="primary"
                               className="mt-4 m-8"
                               onClick={() =>
-                                handleDonateClick(request.blood_type)
+                                handleDonateClick(hospital.hospital_id, request.request_id, request.blood_type)
                               }
                             >
                               Donate
