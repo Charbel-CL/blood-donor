@@ -16,20 +16,36 @@ import {
   IconButton,
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import axios from 'axios';
 
 const HospitalManagement = () => {
   const [hospitals, setHospitals] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [formValues, setFormValues] = useState({ name: '', location: '' });
+  const [formValues, setFormValues] = useState({
+    hospital_id: '',
+    name: '',
+    address: '',
+    contact_number: '',
+    lat: '',
+    lng: '',
+    email: '',
+    rating: '',
+    image: ''
+  });
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
-    // Simulate fetching hospitals from an API
-    setHospitals([
-      { name: 'Hospital A', location: 'Location A' },
-      { name: 'Hospital B', location: 'Location B' },
-    ]);
+    fetchHospitals();
   }, []);
+
+  const fetchHospitals = async () => {
+    try {
+      const response = await axios.get('http://localhost:5212/api/Hospitals');
+      setHospitals(response.data);
+    } catch (error) {
+      console.error('Error fetching hospitals:', error);
+    }
+  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -37,7 +53,17 @@ const HospitalManagement = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setFormValues({ name: '', location: '' });
+    setFormValues({
+      hospital_id: '',
+      name: '',
+      address: '',
+      contact_number: '',
+      lat: '',
+      lng: '',
+      email: '',
+      rating: '',
+      image: ''
+    });
     setEditIndex(null);
   };
 
@@ -49,15 +75,29 @@ const HospitalManagement = () => {
     }));
   };
 
-  const handleAddEditHospital = () => {
-    if (editIndex !== null) {
-      const updatedHospitals = [...hospitals];
-      updatedHospitals[editIndex] = formValues;
-      setHospitals(updatedHospitals);
-    } else {
-      setHospitals([...hospitals, formValues]);
+  const handleAddEditHospital = async () => {
+    const payload = {
+      name: formValues.name,
+      address: formValues.address,
+      contact_number: formValues.contact_number,
+      lat: formValues.lat,
+      lng: formValues.lng,
+      email: formValues.email,
+      rating: formValues.rating,
+      image: formValues.image,
+    };
+
+    try {
+      if (editIndex !== null) {
+        await axios.put(`http://localhost:5212/api/Hospitals/${hospitals[editIndex].hospital_id}`, payload);
+      } else {
+        await axios.post('http://localhost:5212/api/Hospitals', payload);
+      }
+      fetchHospitals();
+      handleCloseDialog();
+    } catch (error) {
+      console.error('Error saving hospital:', error);
     }
-    handleCloseDialog();
   };
 
   const handleEditHospital = (index) => {
@@ -66,8 +106,13 @@ const HospitalManagement = () => {
     handleOpenDialog();
   };
 
-  const handleDeleteHospital = (index) => {
-    setHospitals(hospitals.filter((_, i) => i !== index));
+  const handleDeleteHospital = async (index) => {
+    try {
+      await axios.delete(`http://localhost:5212/api/Hospitals/${hospitals[index].hospital_id}`);
+      setHospitals(hospitals.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error deleting hospital:', error);
+    }
   };
 
   return (
@@ -82,7 +127,13 @@ const HospitalManagement = () => {
         <TableHead>
           <TableRow>
             <TableCell>Hospital Name</TableCell>
-            <TableCell>Location</TableCell>
+            <TableCell>Address</TableCell>
+            <TableCell>Contact Number</TableCell>
+            <TableCell>Latitude</TableCell>
+            <TableCell>Longitude</TableCell>
+            <TableCell>Email</TableCell>
+            <TableCell>Rating</TableCell>
+            <TableCell>Image</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -90,7 +141,13 @@ const HospitalManagement = () => {
           {hospitals.map((hospital, index) => (
             <TableRow key={index}>
               <TableCell>{hospital.name}</TableCell>
-              <TableCell>{hospital.location}</TableCell>
+              <TableCell>{hospital.address}</TableCell>
+              <TableCell>{hospital.contact_number}</TableCell>
+              <TableCell>{hospital.lat}</TableCell>
+              <TableCell>{hospital.lng}</TableCell>
+              <TableCell>{hospital.email}</TableCell>
+              <TableCell>{hospital.rating}</TableCell>
+              <TableCell>{hospital.image}</TableCell>
               <TableCell>
                 <IconButton color="primary" onClick={() => handleEditHospital(index)}>
                   <EditIcon />
@@ -116,9 +173,57 @@ const HospitalManagement = () => {
           />
           <TextField
             margin="dense"
-            label="Location"
-            name="location"
-            value={formValues.location}
+            label="Address"
+            name="address"
+            value={formValues.address}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Contact Number"
+            name="contact_number"
+            value={formValues.contact_number}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Latitude"
+            name="lat"
+            value={formValues.lat}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Longitude"
+            name="lng"
+            value={formValues.lng}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            value={formValues.email}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Rating"
+            name="rating"
+            value={formValues.rating}
+            onChange={handleFormChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Image"
+            name="image"
+            value={formValues.image}
             onChange={handleFormChange}
             fullWidth
           />
