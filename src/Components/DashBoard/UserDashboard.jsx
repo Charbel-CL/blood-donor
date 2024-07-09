@@ -75,7 +75,9 @@ const UserDashboard = () => {
 
     const fetchHospitalsAndRequests = async () => {
       try {
-        const hospitalsResponse = await axios.get("http://localhost:5212/api/Hospitals");
+        const hospitalsResponse = await axios.get(
+          "http://localhost:5212/api/Hospitals"
+        );
         const hospitalsWithCoords = await Promise.all(
           hospitalsResponse.data.map(async (hospital) => {
             if (hospital.lat && hospital.lng) {
@@ -92,7 +94,9 @@ const UserDashboard = () => {
           })
         );
 
-        const bloodRequestsResponse = await axios.get("http://localhost:5212/api/BloodRequests");
+        const bloodRequestsResponse = await axios.get(
+          "http://localhost:5212/api/BloodRequests"
+        );
         setBloodRequests(bloodRequestsResponse.data);
         setHospitals(hospitalsWithCoords);
       } catch (error) {
@@ -105,8 +109,8 @@ const UserDashboard = () => {
   }, []);
 
   const getStatusClass = (status) => {
-    if (status === "Pending") return "pending";
-    if (status === "Fulfilled") return "fulfilled";
+    if (status === "Pending") return "status pending";
+    if (status === "Fulfilled") return "status fulfilled";
     return "";
   };
 
@@ -137,7 +141,9 @@ const UserDashboard = () => {
     setOpenDialog(true);
 
     if (compatible) {
-      navigate(`/donation-form?hospitalId=${hospitalId}&requestId=${requestId}`);
+      navigate(
+        `/donation-form?hospitalId=${hospitalId}&requestId=${requestId}`
+      );
     }
   };
 
@@ -171,7 +177,11 @@ const UserDashboard = () => {
 
   return (
     <div className="dashboard-wrapper mt-20">
-      <Container className="content-container">
+      <Container
+        className={`content-container ${
+          filteredHospitals.length === 0 ? "no-padding" : ""
+        }`}
+      >
         <Typography variant="h4" component="h1" gutterBottom className="mt-4">
           Blood Requests
         </Typography>
@@ -212,7 +222,12 @@ const UserDashboard = () => {
           )}
         </Grid>
         {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="50vh"
+          >
             <CircularProgress />
           </Box>
         ) : (
@@ -224,7 +239,14 @@ const UserDashboard = () => {
                 );
                 return (
                   <Grid item xs={12} sm={6} md={4} key={hospital.hospital_id}>
-                    <Card className="card">
+                    {/* <Card className="card"> */}
+                    <Card
+                      className="card"
+                      style={{
+                        height:
+                          hospitalBloodRequests.length === 0 ? "450px" : "auto",
+                      }}
+                    >
                       <CardHeader title={hospital.name} />
                       <CardMedia
                         className="card-media"
@@ -270,9 +292,11 @@ const UserDashboard = () => {
                         >
                           Email: {hospital.email}
                         </Typography>
-                        <Typography variant="h6" component="h2" gutterBottom>
-                          Blood Requests
-                        </Typography>
+                        {hospitalBloodRequests.length > 0 && (
+                          <Typography variant="h6" component="h2" gutterBottom>
+                            Blood Requests
+                          </Typography>
+                        )}
                         {hospitalBloodRequests.map((request) => (
                           <div key={request.request_id}>
                             <Typography variant="body2" className="mb-2">
@@ -285,15 +309,26 @@ const UserDashboard = () => {
                             >
                               Quantity: {request.quantity} units
                             </Typography>
-                            {request.user_id === user.user_id && request.status && (
-                              <Typography
-                                variant="body2"
-                                className={`status ${getStatusClass(request.status)}`}
-                                style={request.status === "Accept" ? { backgroundColor: "#4caf50" } : {}}
-                              >
-                                Status: {request.status === "Accept" ? "Fulfilled" : request.status}
-                              </Typography>
-                            )}
+                            {request.user_id === user.user_id &&
+                              request.status && (
+                                <Typography
+                                  variant="body2"
+                                  className={`status ${getStatusClass(
+                                    request.status
+                                  )}`}
+                                  style={
+                                    request.status === "Accept"
+                                      ? { backgroundColor: "#4caf50" }
+                                      : {}
+                                  }
+                                >
+                                  Status:{" "}
+                                  {request.status === "Accept"
+                                    ? "Fulfilled"
+                                    : request.status}
+                                </Typography>
+                              )}
+
                             <Button
                               variant="contained"
                               color="primary"

@@ -26,7 +26,9 @@
   flex-grow: 1;
   color: #000; 
 }
-
+.status-container {
+  margin-top: 16px;
+}
 .status {
   margin-top: 16px;
   padding: 8px;
@@ -37,8 +39,6 @@
 .status.pending {
   background-color: #ff9800; 
 }
-
-
 
 .rating {
   display: flex;
@@ -110,6 +110,7 @@
   font-size: 12px;
   color: #aaa;
 }
+
 
 @media (max-width: 768px) {
   .carousel-inner{

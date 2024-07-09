@@ -19,7 +19,7 @@ import {
   FormControl,
   InputLabel,
   Switch,
-  Box
+  Box,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -43,6 +43,8 @@ const BloodManagement = () => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialStatuses, setInitialStatuses] = useState({});
+
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
   const fetchBloodRequests = async () => {
@@ -56,7 +58,7 @@ const BloodManagement = () => {
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text(); // Read and log the text
+        const text = await response.text();
         console.error("Response is not JSON. Response text:", text);
         throw new Error("Response is not JSON");
       }
@@ -66,6 +68,11 @@ const BloodManagement = () => {
 
       if (Array.isArray(data)) {
         setBloodRequests(data);
+        const statuses = data.reduce((acc, request) => {
+          acc[request.request_id] = request.status;
+          return acc;
+        }, {});
+        setInitialStatuses(statuses);
       } else {
         setError("Error: Blood requests data is not an array.");
       }
@@ -175,10 +182,18 @@ const BloodManagement = () => {
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "quantity") {
+      const numericValue = Math.max(1, Math.min(parseInt(value, 10), 999)); // Ensuring quantity is between 1 and 999
+      setFormValues((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+    } else {
+      setFormValues((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const { postData, data, error: postError, loading: postLoading } = usePost();
@@ -196,11 +211,12 @@ const BloodManagement = () => {
         quantity: formValues.quantity,
         hospital_id: formValues.hospital_id,
         user_id: formValues.user_id,
-        status: editIndex !== null ? bloodRequests[editIndex].status : "Pending", 
+        status:
+          editIndex !== null ? bloodRequests[editIndex].status : "Pending",
       };
 
-      console.log('Sending request to:', url); 
-      console.log('Request payload:', payload);
+      console.log("Sending request to:", url);
+      console.log("Request payload:", payload);
 
       const response = await fetch(url, {
         method,
@@ -223,7 +239,7 @@ const BloodManagement = () => {
 
   const handleEditBlood = (index) => {
     const recordToEdit = bloodRequests[index];
-    console.log('Editing record:', recordToEdit); 
+    console.log("Editing record:", recordToEdit);
     setFormValues({
       requestId: recordToEdit.request_id,
       blood_type: recordToEdit.blood_type,
@@ -257,8 +273,19 @@ const BloodManagement = () => {
 
   const handleStatusChange = async (record) => {
     try {
+      // Determine the new status and adjust quantity accordingly
       const newStatus = record.status === "Pending" ? "Accept" : "Pending";
-      const updatedRequest = { ...record, status: newStatus };
+      const newQuantity =
+        newStatus === "Accept" ? record.quantity - 1 : record.quantity + 1;
+
+      // Create the updated request object
+      const updatedRequest = {
+        ...record,
+        status: newStatus,
+        quantity: newQuantity,
+      };
+
+      // Send the update request to the server
       const url = `http://localhost:5212/api/BloodManagement/requests/${record.request_id}`;
       const response = await fetch(url, {
         method: "PUT",
@@ -280,7 +307,12 @@ const BloodManagement = () => {
 
   return (
     <Container>
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
         <Typography variant="h5" component="h2">
           Manage Blood Requests
         </Typography>
@@ -349,7 +381,7 @@ const BloodManagement = () => {
           {editIndex !== null ? "Edit Blood Request" : "Add Blood Request"}
         </DialogTitle>
         <DialogContent sx={{ minHeight: "300px" }}>
-          <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense" sx={{ marginBottom: "20px" }}>
             <InputLabel>Blood Type</InputLabel>
             <Select
               label="Blood Type"
@@ -372,10 +404,14 @@ const BloodManagement = () => {
             onChange={handleFormChange}
             type="number"
             fullWidth
+            InputProps={{ inputProps: { min: 1, max: 999 } }}
+            sx={{ marginBottom: "20px" }}
           />
-          <FormControl fullWidth margin="dense">
+
+          <FormControl fullWidth margin="dense" sx={{ marginBottom: "20px" }}>
             <InputLabel>Hospitals</InputLabel>
             <Select
+              label="Hospital Id"
               name="hospital_id"
               value={formValues.hospital_id}
               onChange={handleFormChange}
@@ -394,8 +430,10 @@ const BloodManagement = () => {
             <InputLabel>Users</InputLabel>
             <Select
               name="user_id"
+               label="Users"
               value={formValues.user_id}
               onChange={handleFormChange}
+              disabled={editIndex !== null}
             >
               {users.map((user) => (
                 <MenuItem key={user.user_id} value={user.user_id}>
