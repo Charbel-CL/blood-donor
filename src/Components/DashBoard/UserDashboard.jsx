@@ -289,8 +289,9 @@ const UserDashboard = () => {
                               <Typography
                                 variant="body2"
                                 className={`status ${getStatusClass(request.status)}`}
+                                style={request.status === "Accept" ? { backgroundColor: "#4caf50" } : {}}
                               >
-                                Status: {request.status}
+                                Status: {request.status === "Accept" ? "Fulfilled" : request.status}
                               </Typography>
                             )}
                             <Button
