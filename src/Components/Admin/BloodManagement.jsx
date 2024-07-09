@@ -18,8 +18,8 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Checkbox,
-  ListItemText,
+  Switch,
+  Box
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -37,7 +37,6 @@ const BloodManagement = () => {
     quantity: "",
     hospital_id: "",
     user_id: "",
-    status: "",
   });
   const [editIndex, setEditIndex] = useState(null);
   const [hospitals, setHospitals] = useState([]);
@@ -170,7 +169,6 @@ const BloodManagement = () => {
       quantity: "",
       hospital_id: "",
       user_id: "",
-      status: "",
     });
     setEditIndex(null);
   };
@@ -192,19 +190,24 @@ const BloodManagement = () => {
         editIndex !== null
           ? `http://localhost:5212/api/BloodManagement/requests/${formValues.requestId}`
           : "http://localhost:5212/api/BloodManagement/requests";
+      const payload = {
+        request_id: formValues.requestId,
+        blood_type: formValues.blood_type,
+        quantity: formValues.quantity,
+        hospital_id: formValues.hospital_id,
+        user_id: formValues.user_id,
+        status: editIndex !== null ? bloodRequests[editIndex].status : "Pending", 
+      };
+
+      console.log('Sending request to:', url); 
+      console.log('Request payload:', payload);
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          request_id: formValues.requestId,
-          blood_type: formValues.blood_type,
-          quantity: formValues.quantity,
-          hospital_id: formValues.hospital_id,
-          user_id: formValues.user_id,
-          status: formValues.status,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -220,13 +223,13 @@ const BloodManagement = () => {
 
   const handleEditBlood = (index) => {
     const recordToEdit = bloodRequests[index];
+    console.log('Editing record:', recordToEdit); 
     setFormValues({
       requestId: recordToEdit.request_id,
       blood_type: recordToEdit.blood_type,
       quantity: recordToEdit.quantity,
       hospital_id: recordToEdit.hospital_id,
       user_id: recordToEdit.user_id,
-      status: recordToEdit.status,
     });
     setEditIndex(index);
     handleOpenDialog();
@@ -252,19 +255,44 @@ const BloodManagement = () => {
     }
   };
 
+  const handleStatusChange = async (record) => {
+    try {
+      const newStatus = record.status === "Pending" ? "Accept" : "Pending";
+      const updatedRequest = { ...record, status: newStatus };
+      const url = `http://localhost:5212/api/BloodManagement/requests/${record.request_id}`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedRequest),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchBloodRequests();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
   return (
     <Container>
-      <Typography variant="h5" component="h2" gutterBottom>
-        Manage Blood Requests
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={handleOpenDialog}
-      >
-        Add Blood Request
-      </Button>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h5" component="h2">
+          Manage Blood Requests
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleOpenDialog}
+        >
+          Add Blood Request
+        </Button>
+      </Box>
       <Table>
         <TableHead>
           <TableRow>
@@ -284,7 +312,15 @@ const BloodManagement = () => {
                 <TableCell>{record.quantity}</TableCell>
                 <TableCell>{getHospitalNameById(record.hospital_id)}</TableCell>
                 <TableCell>{getUserNameById(record.user_id)}</TableCell>
-                <TableCell>{record.status}</TableCell>
+                <TableCell>
+                  <Switch
+                    checked={record.status === "Accept"}
+                    onChange={() => handleStatusChange(record)}
+                    name="status"
+                    color="primary"
+                  />
+                  {record.status}
+                </TableCell>
                 <TableCell>
                   <IconButton
                     color="primary"
@@ -366,17 +402,6 @@ const BloodManagement = () => {
                   {user.first_name}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Status</InputLabel>
-            <Select
-              name="status"
-              value={formValues.status}
-              onChange={handleFormChange}
-            >
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

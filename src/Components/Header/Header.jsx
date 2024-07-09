@@ -36,7 +36,8 @@ function Header() {
   const isAuthPage =
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
-    location.pathname === "/donation-history";
+    location.pathname === "/donation-history" ||
+    location.pathname === "/admin";
   const isRestrictedPage =
     location.pathname === "/dashboard" ||
     location.pathname === "/donation-form" ||

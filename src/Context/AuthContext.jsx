@@ -10,12 +10,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = () => {
     setAuthenticated(true);
-    setIsAdmin(false); // Ensure normal login sets isAdmin to false
+    setIsAdmin(false);
   };
 
   const adminLogin = () => {
     setAuthenticated(true);
-    setIsAdmin(true); // Admin login sets isAdmin to true
+    setIsAdmin(true);
   };
 
   const logout = () => {
