@@ -46,16 +46,10 @@ function Login() {
 
   const submitLogIn = (e) => {
     e.preventDefault();
-    if (user.email === "admin@example.com" && user.password === "admin123") {
-      adminLogin();
-      localStorage.setItem("admin", true);
-      navigate("/admin");
-    } else {
-      postData("/api/Users/signin", {
-        email: user.email,
-        password: user.password,
-      });
-    }
+    postData("/api/Users/signin", {
+      email: user.email,
+      password: user.password,
+    });
   };
 
   useEffect(() => {
@@ -63,7 +57,14 @@ function Login() {
       console.log("Login successful", data);
       login();
       localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/dashboard");
+
+      if (data.user.role === "Admin") {
+        adminLogin();
+        localStorage.setItem("admin", true);
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } else if (error) {
       if (error === "Invalid email or password") {
         setFormError("Invalid email or password. Please try again.");

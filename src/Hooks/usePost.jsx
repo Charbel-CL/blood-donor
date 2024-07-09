@@ -8,7 +8,7 @@ function usePost() {
   const postData = async (url, postData) => {
     setLoading(true);
     setError(null);
-    setData(null); // Ensure data is cleared on new request
+    setData(null); 
     try {
       const response = await fetch(`http://localhost:5212${url}`, {
         method: "POST",
