@@ -18,6 +18,8 @@ import {
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import axios from 'axios';
 
+const API_KEY = 'e0d03330b1bc40f3b07fa65f9befaa09'; 
+
 const HospitalManagement = () => {
   const [hospitals, setHospitals] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -67,12 +69,22 @@ const HospitalManagement = () => {
     setEditIndex(null);
   };
 
-  const handleFormChange = (event) => {
+  const handleFormChange = async (event) => {
     const { name, value } = event.target;
     setFormValues((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    if (name === 'address') {
+      const response = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(value)}&key=${API_KEY}`);
+      const { lat, lng } = response.data.results[0].geometry;
+      setFormValues((prev) => ({
+        ...prev,
+        lat,
+        lng,
+      }));
+    }
   };
 
   const handleAddEditHospital = async () => {
@@ -192,16 +204,16 @@ const HospitalManagement = () => {
             label="Latitude"
             name="lat"
             value={formValues.lat}
-            onChange={handleFormChange}
             fullWidth
+            InputProps={{ readOnly: true }}
           />
           <TextField
             margin="dense"
             label="Longitude"
             name="lng"
             value={formValues.lng}
-            onChange={handleFormChange}
             fullWidth
+            InputProps={{ readOnly: true }}
           />
           <TextField
             margin="dense"
