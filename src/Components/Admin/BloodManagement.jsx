@@ -26,7 +26,9 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-import usePost from "../../Hooks/usePost";
+import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const BloodManagement = () => {
   const [bloodRequests, setBloodRequests] = useState([]);
@@ -37,6 +39,7 @@ const BloodManagement = () => {
     quantity: "",
     hospital_id: "",
     user_id: "",
+    donation_date: null,
   });
   const [editIndex, setEditIndex] = useState(null);
   const [hospitals, setHospitals] = useState([]);
@@ -176,6 +179,7 @@ const BloodManagement = () => {
       quantity: "",
       hospital_id: "",
       user_id: "",
+      donation_date: null,
     });
     setEditIndex(null);
   };
@@ -196,7 +200,12 @@ const BloodManagement = () => {
     }
   };
 
-  const { postData, data, error: postError, loading: postLoading } = usePost();
+  const handleDateTimeChange = (newValue) => {
+    setFormValues((prev) => ({
+      ...prev,
+      donation_date: newValue,
+    }));
+  };
 
   const handleAddEditBlood = async () => {
     try {
@@ -213,11 +222,14 @@ const BloodManagement = () => {
         user_id: formValues.user_id,
         status:
           editIndex !== null ? bloodRequests[editIndex].status : "Pending",
+        donation_date: formValues.donation_date
+          ? formValues.donation_date.toISOString()
+          : null,
       };
-
+  
       console.log("Sending request to:", url);
       console.log("Request payload:", payload);
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -225,17 +237,34 @@ const BloodManagement = () => {
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
+      // Update donation date if editIndex is not null
+      if (editIndex !== null && formValues.donation_date) {
+        const donationPayload = {
+          donation_date: formValues.donation_date.toISOString(),
+        };
+  
+        await fetch(`http://localhost:5212/api/BloodManagement/donations/${formValues.requestId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(donationPayload),
+        });
+      }
+  
       fetchBloodRequests();
+  
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving blood request:", error);
     }
   };
+  
 
   const handleEditBlood = (index) => {
     const recordToEdit = bloodRequests[index];
@@ -246,6 +275,9 @@ const BloodManagement = () => {
       quantity: recordToEdit.quantity,
       hospital_id: recordToEdit.hospital_id,
       user_id: recordToEdit.user_id,
+      donation_date: recordToEdit.donation_date
+        ? dayjs(recordToEdit.donation_date)
+        : null,
     });
     setEditIndex(index);
     handleOpenDialog();
@@ -333,6 +365,7 @@ const BloodManagement = () => {
             <TableCell>Hospital Name</TableCell>
             <TableCell>User Name</TableCell>
             <TableCell>Status</TableCell>
+            <TableCell>Donation Date</TableCell> {/* Add this line */}
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -352,6 +385,13 @@ const BloodManagement = () => {
                     color="primary"
                   />
                   {record.status}
+                </TableCell>
+                <TableCell>
+                  {record.donation_date
+                    ? dayjs(record.donation_date).format(
+                        "MMMM DD, YYYY HH:mm"
+                      )
+                    : "N/A"} {/* Add this block */}
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -442,6 +482,37 @@ const BloodManagement = () => {
               ))}
             </Select>
           </FormControl>
+          {editIndex !== null && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="mb-8 mt-8">
+                <DateTimePicker
+                  label="Select Date and Time"
+                  value={formValues.donation_date}
+                  onChange={handleDateTimeChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      margin="normal"
+                      error={false}
+                      helperText=""
+                      inputProps={{
+                        ...params.inputProps,
+                        readOnly: false,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "",
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </div>
+            </LocalizationProvider>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="secondary">
