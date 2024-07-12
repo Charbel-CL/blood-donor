@@ -39,7 +39,9 @@
 .status.pending {
   background-color: #ff9800; 
 }
-
+.status.rejected {
+  background-color: red;
+}
 .rating {
   display: flex;
   align-items: center;

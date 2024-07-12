@@ -111,6 +111,7 @@ const UserDashboard = () => {
   const getStatusClass = (status) => {
     if (status === "Pending") return "status pending";
     if (status === "Fulfilled") return "status fulfilled";
+    if (status === "Rejected") return "status rejected";
     return "";
   };
 
@@ -319,6 +320,8 @@ const UserDashboard = () => {
                                   style={
                                     request.status === "Accept"
                                       ? { backgroundColor: "#4caf50" }
+                                      : request.status === "Rejected"
+                                      ? { backgroundColor: "red" }
                                       : {}
                                   }
                                 >

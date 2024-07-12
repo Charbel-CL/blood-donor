@@ -25,6 +25,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -265,7 +266,6 @@ const BloodManagement = () => {
     }
   };
   
-
   const handleEditBlood = (index) => {
     const recordToEdit = bloodRequests[index];
     console.log("Editing record:", recordToEdit);
@@ -337,6 +337,28 @@ const BloodManagement = () => {
     }
   };
 
+  const handleCancelAppointment = async (record) => {
+    try {
+      const url = `http://localhost:5212/api/BloodManagement/requests/status/${record.request_id}`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "Rejected" }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchBloodRequests();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+};
+
+
   return (
     <Container>
       <Box
@@ -365,7 +387,7 @@ const BloodManagement = () => {
             <TableCell>Hospital Name</TableCell>
             <TableCell>User Name</TableCell>
             <TableCell>Status</TableCell>
-            <TableCell>Donation Date</TableCell> {/* Add this line */}
+            <TableCell>Donation Date</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -391,7 +413,7 @@ const BloodManagement = () => {
                     ? dayjs(record.donation_date).format(
                         "MMMM DD, YYYY HH:mm"
                       )
-                    : "N/A"} {/* Add this block */}
+                    : "N/A"}
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -405,6 +427,12 @@ const BloodManagement = () => {
                     onClick={() => handleDeleteBlood(index)}
                   >
                     <DeleteIcon />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleCancelAppointment(record)}
+                  >
+                    <CloseIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -489,6 +517,7 @@ const BloodManagement = () => {
                   label="Select Date and Time"
                   value={formValues.donation_date}
                   onChange={handleDateTimeChange}
+                  disablePast
                   renderInput={(params) => (
                     <TextField
                       {...params}
