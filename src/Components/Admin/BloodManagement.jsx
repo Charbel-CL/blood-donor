@@ -26,6 +26,10 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
+import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import axios from "axios";
 import usePost from "../../Hooks/usePost";
 
 const BloodManagement = () => {
@@ -37,6 +41,7 @@ const BloodManagement = () => {
     quantity: "",
     hospital_id: "",
     user_id: "",
+    donation_date: null,
   });
   const [editIndex, setEditIndex] = useState(null);
   const [hospitals, setHospitals] = useState([]);
@@ -95,7 +100,7 @@ const BloodManagement = () => {
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text(); // Read and log the text
+        const text = await response.text();
         console.error("Response is not JSON. Response text:", text);
         throw new Error("Response is not JSON");
       }
@@ -127,7 +132,7 @@ const BloodManagement = () => {
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text(); // Read and log the text
+        const text = await response.text();
         console.error("Response is not JSON. Response text:", text);
         throw new Error("Response is not JSON");
       }
@@ -176,6 +181,7 @@ const BloodManagement = () => {
       quantity: "",
       hospital_id: "",
       user_id: "",
+      donation_date: null,
     });
     setEditIndex(null);
   };
@@ -183,7 +189,7 @@ const BloodManagement = () => {
   const handleFormChange = (event) => {
     const { name, value } = event.target;
     if (name === "quantity") {
-      const numericValue = Math.max(1, Math.min(parseInt(value, 10), 999)); // Ensuring quantity is between 1 and 999
+      const numericValue = Math.max(1, Math.min(parseInt(value, 10), 999));
       setFormValues((prev) => ({
         ...prev,
         [name]: numericValue,
@@ -194,6 +200,13 @@ const BloodManagement = () => {
         [name]: value,
       }));
     }
+  };
+
+  const handleDateTimeChange = (newValue) => {
+    setFormValues((prev) => ({
+      ...prev,
+      donation_date: newValue,
+    }));
   };
 
   const { postData, data, error: postError, loading: postLoading } = usePost();
@@ -211,6 +224,9 @@ const BloodManagement = () => {
         quantity: formValues.quantity,
         hospital_id: formValues.hospital_id,
         user_id: formValues.user_id,
+        donation_date: formValues.donation_date
+          ? formValues.donation_date.toISOString()
+          : null,
         status:
           editIndex !== null ? bloodRequests[editIndex].status : "Pending",
       };
@@ -246,6 +262,9 @@ const BloodManagement = () => {
       quantity: recordToEdit.quantity,
       hospital_id: recordToEdit.hospital_id,
       user_id: recordToEdit.user_id,
+      donation_date: recordToEdit.donation_date
+        ? dayjs(recordToEdit.donation_date)
+        : null,
     });
     setEditIndex(index);
     handleOpenDialog();
@@ -273,19 +292,16 @@ const BloodManagement = () => {
 
   const handleStatusChange = async (record) => {
     try {
-      // Determine the new status and adjust quantity accordingly
       const newStatus = record.status === "Pending" ? "Accept" : "Pending";
       const newQuantity =
         newStatus === "Accept" ? record.quantity - 1 : record.quantity + 1;
 
-      // Create the updated request object
       const updatedRequest = {
         ...record,
         status: newStatus,
         quantity: newQuantity,
       };
 
-      // Send the update request to the server
       const url = `http://localhost:5212/api/BloodManagement/requests/${record.request_id}`;
       const response = await fetch(url, {
         method: "PUT",
@@ -333,6 +349,7 @@ const BloodManagement = () => {
             <TableCell>Hospital Name</TableCell>
             <TableCell>User Name</TableCell>
             <TableCell>Status</TableCell>
+            <TableCell>Donation Date</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -352,6 +369,13 @@ const BloodManagement = () => {
                     color="primary"
                   />
                   {record.status}
+                </TableCell>
+                <TableCell>
+                  {record.donation_date
+                    ? dayjs(record.donation_date).format(
+                        "MMMM DD, YYYY HH:mm"
+                      )
+                    : "N/A"}
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -430,7 +454,7 @@ const BloodManagement = () => {
             <InputLabel>Users</InputLabel>
             <Select
               name="user_id"
-               label="Users"
+              label="Users"
               value={formValues.user_id}
               onChange={handleFormChange}
               disabled={editIndex !== null}
@@ -442,6 +466,37 @@ const BloodManagement = () => {
               ))}
             </Select>
           </FormControl>
+          {editIndex !== null && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="mb-8 mt-8">
+                <DateTimePicker
+                  label="Select Date and Time"
+                  value={formValues.donation_date}
+                  onChange={handleDateTimeChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      margin="normal"
+                      error={false}
+                      helperText=""
+                      inputProps={{
+                        ...params.inputProps,
+                        readOnly: false,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "",
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </div>
+            </LocalizationProvider>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="secondary">

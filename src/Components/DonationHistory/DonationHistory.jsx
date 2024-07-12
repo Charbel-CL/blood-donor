@@ -4,7 +4,6 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemText,
   Paper,
   CircularProgress,
   Card,
@@ -24,11 +23,12 @@ const DonationHistory = () => {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user) {
-          // Handle the case when the user is not logged in
           return;
         }
 
-        const response = await axios.get(`http://localhost:5212/api/DonationHistory/user/${user.user_id}`);
+        const response = await axios.get(
+          `http://localhost:5212/api/DonationHistory/user/${user.user_id}`
+        );
         setHistory(response.data);
         setLoading(false);
       } catch (error) {
@@ -71,19 +71,20 @@ const DonationHistory = () => {
                 <ListItem key={index} className="donation-item">
                   <Card className="donation-card" variant="outlined">
                     <CardContent>
-                    <Typography variant="body1">
+                      <Typography variant="body1">
                         <strong>Hospital Name:</strong> {item.HospitalName}
                       </Typography>
-                      <Typography variant="body1">
-                        <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
+                      {/* <Typography variant="body1">
+                        <strong>Date:</strong>{" "}
+                        {item.date ? new Date(item.date).toLocaleDateString() : "N/A"}
                       </Typography>
                       <Typography variant="body1">
-                        <strong>Time:</strong> {new Date(item.date).toLocaleTimeString()}
+                        <strong>Time:</strong>{" "}
+                        {item.date ? new Date(item.date).toLocaleTimeString() : "N/A"}
                       </Typography>
                       <Typography variant="body1">
                         <strong>Location:</strong> {item.Location}
-                      </Typography>
-                    
+                      </Typography> */}
                     </CardContent>
                   </Card>
                 </ListItem>

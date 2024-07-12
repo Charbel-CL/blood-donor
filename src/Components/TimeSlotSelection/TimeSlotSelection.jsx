@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -8,293 +7,519 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
   Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import axios from "axios";
-import "./TimeSlotSelection.css";
 
-const TimeSlotSelection = () => {
-  const [selectedDateTime, setSelectedDateTime] = useState(null);
+const BloodManagement = () => {
+  const [bloodRequests, setBloodRequests] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [validationError, setValidationError] = useState("");
-  const [hospital, setHospital] = useState({});
-  const [bloodRequest, setBloodRequest] = useState({});
-  const navigate = useNavigate();
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const hospitalId = params.get("hospitalId");
-  const requestId = params.get("requestId");
+  const [formValues, setFormValues] = useState({
+    requestId: 0,
+    blood_type: "",
+    quantity: "",
+    hospital_id: "",
+    user_id: "",
+    donation_date: null,
+  });
+  const [editIndex, setEditIndex] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [initialStatuses, setInitialStatuses] = useState({});
+
+  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+  const fetchBloodRequests = async () => {
+    const url = "http://localhost:5212/api/BloodManagement/requests";
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Response is not JSON. Response text:", text);
+        throw new Error("Response is not JSON");
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (Array.isArray(data)) {
+        setBloodRequests(data);
+        const statuses = data.reduce((acc, request) => {
+          acc[request.request_id] = request.status;
+          return acc;
+        }, {});
+        setInitialStatuses(statuses);
+      } else {
+        setError("Error: Blood requests data is not an array.");
+      }
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+      console.error("Error fetching blood requests:", error);
+    }
+  };
+
+  const fetchHospitals = async () => {
+    const url = "http://localhost:5212/api/BloodManagement/hospitals";
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Response is not JSON. Response text:", text);
+        throw new Error("Response is not JSON");
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (Array.isArray(data)) {
+        setHospitals(data);
+      } else {
+        setError("Error: Hospitals data is not an array.");
+      }
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+      console.error("Error fetching hospitals:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    const url = "http://localhost:5212/api/Users";
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Response is not JSON. Response text:", text);
+        throw new Error("Response is not JSON");
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setError("Error: Users data is not an array.");
+      }
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+      console.error("Error fetching users:", error);
+    }
+  };
 
   useEffect(() => {
-    fetchHospitalAndRequestDetails();
+    fetchBloodRequests();
+    fetchHospitals();
+    fetchUsers();
   }, []);
 
-  const fetchHospitalAndRequestDetails = async () => {
-    try {
-      const hospitalResponse = await axios.get(
-        `http://localhost:5212/api/Hospitals/${hospitalId}`
-      );
-      setHospital(hospitalResponse.data);
-
-      const requestResponse = await axios.get(
-        `http://localhost:5212/api/BloodRequests/${requestId}`
-      );
-      setBloodRequest(requestResponse.data);
-    } catch (error) {
-      console.error("Error fetching details:", error);
-    }
+  const getHospitalNameById = (id) => {
+    const hospital = hospitals.find((hospital) => hospital.hospital_id === id);
+    return hospital ? hospital.name : "";
   };
 
-  useEffect(() => {
-    if (selectedDateTime !== null) {
-      validateDateTime(selectedDateTime);
-    }
-  }, [selectedDateTime]);
-
-  const handleBooking = () => {
-    if (!selectedDateTime || validationError) {
-      setValidationError("Please select a valid date and time.");
-      return;
-    }
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (selectedDateTime) {
-        setOpenDialog(true);
-      } else {
-        setErrorMessage("Invalid date or time selected. Please try again.");
-      }
-    }, 1000);
-  };
-  const handleConfirmBooking = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
-      setErrorMessage("You need to be logged in to confirm the booking.");
-      return;
-    }
-
-    const bookingData = {
-      user_id: user.user_id,
-      hospital_id: hospitalId,
-      request_id: requestId,
-      blood_type: user.bloodType,
-      quantity: 1,
-      donation_date: selectedDateTime.toISOString(),
-    };
-
-    try {
-      await axios.post("http://localhost:5212/api/BloodDonations", bookingData);
-
-      const updateRequestData = {
-        userId: user.user_id,
-        status: "Pending",
-      };
-      await axios.put(
-        `http://localhost:5212/api/BloodRequests/update/${requestId}`,
-        updateRequestData
-      );
-
-      setOpenDialog(false);
-      alert("Your request is pending and will be approved by the hospital.");
-      navigate("/dashboard", { state: { dateTime: selectedDateTime } });
-    } catch (error) {
-      console.error("Error saving booking:", error);
-      setErrorMessage(
-        "An error occurred while saving your booking. Please try again."
-      );
-    }
+  const getUserNameById = (id) => {
+    const user = users.find((user) => user.user_id === id);
+    return user ? user.first_name : "";
   };
 
-  const validateDateTime = (dateTime) => {
-    if (!dateTime || !dayjs(dateTime).isValid()) {
-      setValidationError("Invalid date and time format.");
-      return;
-    }
-    if (dayjs(dateTime).isBefore(dayjs().add(2, "hour"))) {
-      setValidationError(
-        "You cannot choose a date and time earlier than 2 hours from now."
-      );
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setFormValues({
+      requestId: 0,
+      blood_type: "",
+      quantity: "",
+      hospital_id: "",
+      user_id: "",
+      donation_date: null,
+    });
+    setEditIndex(null);
+  };
+
+  const handleFormChange = (event) => {
+    const { name, value } = event.target;
+    if (name === "quantity") {
+      const numericValue = Math.max(1, Math.min(parseInt(value, 10), 999));
+      setFormValues((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
     } else {
-      setValidationError("");
+      setFormValues((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleDateTimeChange = (newValue) => {
+    setFormValues((prev) => ({
+      ...prev,
+      donation_date: newValue,
+    }));
+  };
+
+  const handleAddEditBlood = async () => {
+    try {
+      const method = editIndex !== null ? "PUT" : "POST";
+      const url =
+        editIndex !== null
+          ? `http://localhost:5212/api/BloodManagement/requests/${formValues.requestId}`
+          : "http://localhost:5212/api/BloodManagement/requests";
+      const payload = {
+        request_id: formValues.requestId,
+        blood_type: formValues.blood_type,
+        quantity: formValues.quantity,
+        hospital_id: formValues.hospital_id,
+        user_id: formValues.user_id,
+        status:
+          editIndex !== null ? bloodRequests[editIndex].status : "Pending",
+      };
+
+      console.log("Sending request to:", url);
+      console.log("Request payload:", payload);
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchBloodRequests();
+
+      // Update donation date if editIndex is not null
+      if (editIndex !== null && formValues.donation_date) {
+        const donationPayload = {
+          request_id: formValues.requestId,
+          donation_date: formValues.donation_date.toISOString(),
+        };
+
+        await fetch(`http://localhost:5212/api/BloodManagement/donations/${formValues.requestId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(donationPayload),
+        });
+      }
+
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error saving blood request:", error);
+    }
+  };
+
+  const handleEditBlood = (index) => {
+    const recordToEdit = bloodRequests[index];
+    console.log("Editing record:", recordToEdit);
+    setFormValues({
+      requestId: recordToEdit.request_id,
+      blood_type: recordToEdit.blood_type,
+      quantity: recordToEdit.quantity,
+      hospital_id: recordToEdit.hospital_id,
+      user_id: recordToEdit.user_id,
+      donation_date: recordToEdit.donation_date
+        ? dayjs(recordToEdit.donation_date)
+        : null,
+    });
+    setEditIndex(index);
+    handleOpenDialog();
+  };
+
+  const handleDeleteBlood = async (index) => {
+    try {
+      const id = bloodRequests[index].request_id;
+      const response = await fetch(
+        `http://localhost:5212/api/BloodManagement/requests/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchBloodRequests();
+    } catch (error) {
+      console.error("Error deleting blood request:", error);
+    }
+  };
+
+  const handleStatusChange = async (record) => {
+    try {
+      const newStatus = record.status === "Pending" ? "Accept" : "Pending";
+      const newQuantity =
+        newStatus === "Accept" ? record.quantity - 1 : record.quantity + 1;
+
+      const updatedRequest = {
+        ...record,
+        status: newStatus,
+        quantity: newQuantity,
+      };
+
+      const url = `http://localhost:5212/api/BloodManagement/requests/${record.request_id}`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedRequest),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchBloodRequests();
+    } catch (error) {
+      console.error("Error updating status:", error);
     }
   };
 
   return (
-    <div className="time-container">
-      <Container className="timeslot-selection mt-40">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Select a Date and Time for Donation
+    <Container>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
+        <Typography variant="h5" component="h2">
+          Manage Blood Requests
         </Typography>
-        <Typography variant="body1" gutterBottom>
-          Please select a suitable date and time for your donation. Ensure you
-          are well-prepared and have followed all pre-donation guidelines.
-        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleOpenDialog}
+        >
+          Add Blood Request
+        </Button>
+      </Box>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Blood Type</TableCell>
+            <TableCell>Quantity (units)</TableCell>
+            <TableCell>Hospital Name</TableCell>
+            <TableCell>User Name</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Donation Date</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {Array.isArray(bloodRequests) &&
+            bloodRequests.map((record, index) => (
+              <TableRow key={index}>
+                <TableCell>{record.blood_type}</TableCell>
+                <TableCell>{record.quantity}</TableCell>
+                <TableCell>{getHospitalNameById(record.hospital_id)}</TableCell>
+                <TableCell>{getUserNameById(record.user_id)}</TableCell>
+                <TableCell>
+                  <Switch
+                    checked={record.status === "Accept"}
+                    onChange={() => handleStatusChange(record)}
+                    name="status"
+                    color="primary"
+                  />
+                  {record.status}
+                </TableCell>
+                <TableCell>
+                  {record.donation_date
+                    ? dayjs(record.donation_date).format(
+                        "MMMM DD, YYYY HH:mm"
+                      )
+                    : "N/A"}
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditBlood(index)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDeleteBlood(index)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {editIndex !== null ? "Edit Blood Request" : "Add Blood Request"}
+        </DialogTitle>
+        <DialogContent sx={{ minHeight: "300px" }}>
+          <FormControl fullWidth margin="dense" sx={{ marginBottom: "20px" }}>
+            <InputLabel>Blood Type</InputLabel>
+            <Select
+              label="Blood Type"
+              name="blood_type"
+              value={formValues.blood_type}
+              onChange={handleFormChange}
+            >
+              {bloodTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Quantity (units)"
+            name="quantity"
+            value={formValues.quantity}
+            onChange={handleFormChange}
+            type="number"
+            fullWidth
+            InputProps={{ inputProps: { min: 1, max: 999 } }}
+            sx={{ marginBottom: "20px" }}
+          />
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          Hospital: {hospital.name}
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Address: {hospital.address}
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Blood Type Needed: {bloodRequest.blood_type}
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          {/* Quantity: {bloodRequest.quantity} units */}
-          Quantity: 1 units
-        </Typography>
-
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <div className="mb-8 mt-8">
-            <DateTimePicker
-              label="Select Date and Time"
-              value={selectedDateTime}
-              onChange={(newValue) => setSelectedDateTime(newValue)}
-              minDate={dayjs()}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  fullWidth
-                  margin="normal"
-                  error={!!validationError}
-                  helperText={validationError}
-                  inputProps={{
-                    ...params.inputProps,
-                    readOnly: false,
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: validationError ? "red" : "",
-                      },
-                    },
-                  }}
+          <FormControl fullWidth margin="dense" sx={{ marginBottom: "20px" }}>
+            <InputLabel>Hospitals</InputLabel>
+            <Select
+              label="Hospital Id"
+              name="hospital_id"
+              value={formValues.hospital_id}
+              onChange={handleFormChange}
+            >
+              {hospitals.map((hospital) => (
+                <MenuItem
+                  key={hospital.hospital_id}
+                  value={hospital.hospital_id}
+                >
+                  {hospital.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Users</InputLabel>
+            <Select
+              name="user_id"
+              label="Users"
+              value={formValues.user_id}
+              onChange={handleFormChange}
+              disabled={editIndex !== null}
+            >
+              {users.map((user) => (
+                <MenuItem key={user.user_id} value={user.user_id}>
+                  {user.first_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {editIndex !== null && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="mb-8 mt-8">
+                <DateTimePicker
+                  label="Select Date and Time"
+                  value={formValues.donation_date}
+                  onChange={handleDateTimeChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      margin="normal"
+                      error={false}
+                      helperText=""
+                      inputProps={{
+                        ...params.inputProps,
+                        readOnly: false,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "",
+                          },
+                        },
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
-        </LocalizationProvider>
-
-        {errorMessage && <Typography color="error">{errorMessage}</Typography>}
-        {validationError && (
-          <Typography color="error">{validationError}</Typography>
-        )}
-
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleBooking}
-            disabled={!!validationError}
-            className="book-button"
-          >
-            {loading ? "Processing..." : "Book Time Slot"}
+              </div>
+            </LocalizationProvider>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
           </Button>
-
-          <Box mt={4} width="100%">
-            <Typography variant="h6">Need Help?</Typography>
-            <Typography variant="body2">
-              Contact us at: support@hospital.com or call (123) 456-7890
-            </Typography>
-          </Box>
-
-          <Box mt={4} width="100%">
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6">Guidelines for Donation</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <List>
-                  <ListItem>
-                    <ListItemText primary="Drink plenty of water before your appointment." />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Eat a healthy meal before donating." />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Avoid caffeine on the day of donation." />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Bring a valid ID with you." />
-                  </ListItem>
-                </List>
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-
-          <Box mt={4} width="100%">
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6">Frequently Asked Questions</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <List>
-                  <ListItem>
-                    <ListItemText
-                      primary="How long does the donation process take?"
-                      secondary="The entire process, including registration, medical screening, and recovery, takes about 1 hour."
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary="What should I bring to my donation appointment?"
-                      secondary="Please bring a valid photo ID and your appointment confirmation."
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary="Can I donate if I have a cold or flu?"
-                      secondary="No, you should be in good health and free of any cold or flu symptoms."
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText
-                      primary="How often can I donate blood?"
-                      secondary="You can donate whole blood every 56 days and platelets every 7 days."
-                    />
-                  </ListItem>
-                </List>
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-        </Box>
-
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Confirm Booking</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              You have selected{" "}
-              {selectedDateTime?.format("MMMM DD, YYYY HH:mm")}. Please confirm
-              your booking.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenDialog(false)} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmBooking} color="primary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
-    </div>
+          <Button onClick={handleAddEditBlood} color="primary">
+            {editIndex !== null ? "Save" : "Add"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 
-export default TimeSlotSelection;
+export default BloodManagement;
