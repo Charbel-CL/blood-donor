@@ -18,6 +18,8 @@ import {
   DialogActions,
   Box,
   CircularProgress,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import ReactStars from "react-rating-stars-component";
 import "./UserDashboard.css";
@@ -55,6 +57,7 @@ const UserDashboard = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState({});
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -99,6 +102,13 @@ const UserDashboard = () => {
         );
         setBloodRequests(bloodRequestsResponse.data);
         setHospitals(hospitalsWithCoords);
+
+        // Initialize activeTab state with the first tab open for each hospital
+        const initialActiveTab = {};
+        hospitalsWithCoords.forEach((hospital) => {
+          initialActiveTab[hospital.hospital_id] = 0;
+        });
+        setActiveTab(initialActiveTab);
       } catch (error) {
         console.error("There was an error fetching the data!", error);
       }
@@ -176,6 +186,10 @@ const UserDashboard = () => {
     );
   });
 
+  const handleTabChange = (hospitalId, event, newValue) => {
+    setActiveTab({ ...activeTab, [hospitalId]: newValue });
+  };
+
   return (
     <div className="dashboard-wrapper mt-20">
       <Container
@@ -240,14 +254,7 @@ const UserDashboard = () => {
                 );
                 return (
                   <Grid item xs={12} sm={6} md={4} key={hospital.hospital_id}>
-                    {/* <Card className="card"> */}
-                    <Card
-                      className="card"
-                      style={{
-                        height:
-                          hospitalBloodRequests.length === 0 ? "450px" : "auto",
-                      }}
-                    >
+                    <Card className="card">
                       <CardHeader title={hospital.name} />
                       <CardMedia
                         className="card-media"
@@ -294,60 +301,80 @@ const UserDashboard = () => {
                           Email: {hospital.email}
                         </Typography>
                         {hospitalBloodRequests.length > 0 && (
-                          <Typography variant="h6" component="h2" gutterBottom>
-                            Blood Requests
-                          </Typography>
-                        )}
-                        {hospitalBloodRequests.map((request) => (
-                          <div key={request.request_id}>
-                            <Typography variant="body2" className="mb-2">
-                              {request.blood_type} Blood Needed
-                            </Typography>
+                          <>
                             <Typography
-                              variant="body2"
-                              color="textSecondary"
-                              className="mb-2"
+                              variant="h6"
+                              component="h2"
+                              gutterBottom
                             >
-                              Quantity: {request.quantity} units
+                              Blood Requests
                             </Typography>
-                            {request.user_id === user.user_id &&
-                              request.status && (
-                                <Typography
-                                  variant="body2"
-                                  className={`status ${getStatusClass(
-                                    request.status
-                                  )}`}
-                                  style={
-                                    request.status === "Accept"
-                                      ? { backgroundColor: "#4caf50" }
-                                      : request.status === "Rejected"
-                                      ? { backgroundColor: "red" }
-                                      : {}
-                                  }
-                                >
-                                  Status:{" "}
-                                  {request.status === "Accept"
-                                    ? "Fulfilled"
-                                    : request.status}
-                                </Typography>
-                              )}
-
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              className="mt-4 m-8"
-                              onClick={() =>
-                                handleDonateClick(
+                            <Tabs
+                              value={activeTab[hospital.hospital_id] || 0}
+                              onChange={(event, newValue) =>
+                                handleTabChange(
                                   hospital.hospital_id,
-                                  request.request_id,
-                                  request.blood_type
+                                  event,
+                                  newValue
                                 )
                               }
+                              variant="scrollable"
+                              scrollButtons="auto"
+                              aria-label="blood request tabs"
                             >
-                              Donate
-                            </Button>
-                          </div>
-                        ))}
+                              {hospitalBloodRequests.map((request, index) => (
+                                <Tab
+                                  key={request.request_id}
+                                  label={request.blood_type}
+                                />
+                              ))}
+                            </Tabs>
+                            {hospitalBloodRequests.map((request, index) => (
+                              <div
+                                role="tabpanel"
+                                hidden={
+                                  activeTab[hospital.hospital_id] !== index
+                                }
+                                id={`tabpanel-${hospital.hospital_id}-${index}`}
+                                aria-labelledby={`tab-${hospital.hospital_id}-${index}`}
+                                key={request.request_id}
+                              >
+                                {activeTab[hospital.hospital_id] === index && (
+                                  <Box p={3}>
+                                    <Typography
+                                      variant="body2"
+                                      className="mb-2"
+                                    >
+                                      Quantity: {request.quantity} units
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      className={`status ${getStatusClass(
+                                        request.status
+                                      )}`}
+                                    >
+                                      Status: {request.status}
+                                    </Typography>
+                                    <Button
+                                      variant="contained"
+                                      color="primary"
+                                      className="mt-4 m-8"
+                                      onClick={() =>
+                                        handleDonateClick(
+                                          hospital.hospital_id,
+                                          request.request_id,
+                                          request.blood_type
+                                        )
+                                      }
+                                    >
+                                      Donate
+                                    </Button>
+                                  </Box>
+                                )}
+                              </div>
+                            ))}
+                          </>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>
